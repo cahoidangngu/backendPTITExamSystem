@@ -2,6 +2,8 @@ package com.quanchun.backendexamsystem.controllers;
 
 import com.quanchun.backendexamsystem.entities.Role;
 import com.quanchun.backendexamsystem.entities.User;
+import com.quanchun.backendexamsystem.error.RoleNotFoundException;
+import com.quanchun.backendexamsystem.error.UserNotFoundException;
 import com.quanchun.backendexamsystem.models.RoleDTO;
 import com.quanchun.backendexamsystem.models.UserDTO;
 import com.quanchun.backendexamsystem.models.UserLoginDTO;
@@ -26,7 +28,7 @@ public class UserControllers {
 
 
     @PostMapping("/login")
-    public ResponseEntity<String> userLogin(@RequestBody @Valid UserLoginDTO userLogin){
+    public ResponseEntity<String> userLogin(@RequestBody @Valid UserLoginDTO userLogin) throws UserNotFoundException{
         String responseBody = "Failed to login";
         if (userService.userLogin(userLogin)){
             responseBody = "Successfully to login";
@@ -45,7 +47,7 @@ public class UserControllers {
     }
 
     @PostMapping("/addNewUser")
-    public ResponseEntity<String> addNewUser(@RequestBody @Valid UserDTO newUser){
+    public ResponseEntity<String> addNewUser(@RequestBody @Valid UserDTO newUser) throws RoleNotFoundException {
         User user = userService.addNewUser(newUser);
         String responseBody = "Cannot add new User";
         if(user!=null){
@@ -54,8 +56,8 @@ public class UserControllers {
         return ResponseEntity.ok(responseBody);
     }
 
-    @PostMapping("/update/{id}")
-    public ResponseEntity<String> updateUserById(@PathVariable("id") Long userId, @RequestBody UserDTO updateUser){
+    @PutMapping("/update/{id}")
+    public ResponseEntity<String> updateUserById(@PathVariable("id") Long userId, @RequestBody UserDTO updateUser) throws UserNotFoundException{
         User user = userService.updateUserById(userId, updateUser);
         String responseBody = "Cannot update User";
         if(user!=null){
@@ -65,14 +67,14 @@ public class UserControllers {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<User> fetchUserById(@PathVariable("id") Long userId){
-        return ResponseEntity.ok(userService.getUserById(userId));
+    public User fetchUserById(@PathVariable("id") Long userId) throws UserNotFoundException {
+        return userService.getUserById(userId);
     }
 
 
     @GetMapping("/list")
-    public ResponseEntity<List<User>> fetchAllUsers(){
-        return ResponseEntity.ok(userService.getAllUser());
+    public List<User> fetchAllUsers() throws UserNotFoundException{
+        return userService.getAllUser();
     }
 
 

@@ -1,11 +1,14 @@
 package com.quanchun.backendexamsystem.services.impls;
 
 import com.quanchun.backendexamsystem.entities.Role;
+import com.quanchun.backendexamsystem.error.RoleNotFoundException;
 import com.quanchun.backendexamsystem.models.RoleDTO;
 import com.quanchun.backendexamsystem.repositories.RoleRepository;
 import com.quanchun.backendexamsystem.services.RoleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.Optional;
 
 @Service
 public class RoleServiceImpl implements RoleService {
@@ -21,7 +24,9 @@ public class RoleServiceImpl implements RoleService {
     }
 
     @Override
-    public Role getRoleById(Long roleId) {
-        return roleRepository.findById(roleId).orElse(null);
+    public Role getRoleById(Long roleId) throws RoleNotFoundException {
+        Optional<Role> optionalRole = roleRepository.findById(roleId);
+        if(!optionalRole.isPresent())throw new RoleNotFoundException("Role not found");
+        return optionalRole.get();
     }
 }
