@@ -18,4 +18,6 @@ public interface UserService {
     User updateUserById(Long userId, UserDTO updateUser) throws UserNotFoundException;
 
     boolean userLogin(UserLoginDTO userLogin) throws UserNotFoundException;
+
+    boolean deleteUserById(Long userId) throws UserNotFoundException;
 }
