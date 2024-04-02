@@ -25,4 +25,18 @@ public class RestResponseEntityExceptionHandler extends ResponseStatusExceptionH
         ErrorMessage message = new ErrorMessage(HttpStatus.NOT_FOUND, exception.getMessage());
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(message);
     }
+
+    @ExceptionHandler(QuestionNotFoundException.class)
+    public ResponseEntity<ErrorMessage> questionNotFoundException(QuestionNotFoundException exception, WebRequest request)
+    {
+        ErrorMessage message = new ErrorMessage(HttpStatus.NOT_FOUND, exception.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(message);
+    }
+
+    @ExceptionHandler(QuizzNotFoundException.class)
+    public ResponseEntity<ErrorMessage> quizzNotFoundException(QuizzNotFoundException exception, WebRequest request)
+    {
+        ErrorMessage message = new ErrorMessage(HttpStatus.NOT_FOUND, exception.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(message);
+    }
 }
