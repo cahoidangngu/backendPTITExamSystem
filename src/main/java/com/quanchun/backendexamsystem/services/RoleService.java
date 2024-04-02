@@ -8,4 +8,6 @@ public interface RoleService {
     Role addNewRole(RoleDTO newRole);
 
     Role getRoleById(Long roleId) throws RoleNotFoundException;
+
+    boolean deleteRoleById(Long roleId) throws RoleNotFoundException;
 }

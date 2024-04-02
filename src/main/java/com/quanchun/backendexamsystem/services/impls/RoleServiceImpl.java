@@ -1,7 +1,9 @@
 package com.quanchun.backendexamsystem.services.impls;
 
 import com.quanchun.backendexamsystem.entities.Role;
+import com.quanchun.backendexamsystem.entities.User;
 import com.quanchun.backendexamsystem.error.RoleNotFoundException;
+import com.quanchun.backendexamsystem.error.UserNotFoundException;
 import com.quanchun.backendexamsystem.models.RoleDTO;
 import com.quanchun.backendexamsystem.repositories.RoleRepository;
 import com.quanchun.backendexamsystem.services.RoleService;
@@ -28,5 +30,16 @@ public class RoleServiceImpl implements RoleService {
         Optional<Role> optionalRole = roleRepository.findById(roleId);
         if(!optionalRole.isPresent())throw new RoleNotFoundException("Role not found");
         return optionalRole.get();
+    }
+
+    @Override
+    public boolean deleteRoleById(Long roleId) throws RoleNotFoundException {
+        Optional<Role> optionalRole = roleRepository.findById(roleId);
+        if(!optionalRole.isPresent()) throw new RoleNotFoundException("Not found role");
+        roleRepository.deleteById(roleId);
+
+        // check if user have been completely delete
+        optionalRole = roleRepository.findById(roleId);
+        return !optionalRole.isPresent();
     }
 }

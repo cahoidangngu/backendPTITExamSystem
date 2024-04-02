@@ -18,13 +18,12 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/api/v1/users")
+@RequestMapping("/api/users")
 public class UserControllers {
     @Autowired
     private UserService userService;
 
-    @Autowired
-    private RoleService roleService;
+
 
 
     @PostMapping("/login")
@@ -32,16 +31,6 @@ public class UserControllers {
         String responseBody = "Failed to login";
         if (userService.userLogin(userLogin)){
             responseBody = "Successfully to login";
-        }
-        return ResponseEntity.ok(responseBody);
-    }
-
-    @PostMapping("/addNewRole")
-    public ResponseEntity<String> addNewRole(@RequestBody @Valid RoleDTO newRole){
-        Role role = roleService.addNewRole(newRole);
-        String responseBody = String.format("Cannot add %s Role", newRole.getName());
-        if(role!=null){
-            responseBody = String.format("Successfully added %s Role", role.getName());
         }
         return ResponseEntity.ok(responseBody);
     }
@@ -67,8 +56,18 @@ public class UserControllers {
     }
 
     @GetMapping("/{id}")
-    public User fetchUserById(@PathVariable("id") Long userId) throws UserNotFoundException {
-        return userService.getUserById(userId);
+    public ResponseEntity<User> fetchUserById(@PathVariable("id") Long userId) throws UserNotFoundException {
+        User user = userService.getUserById(userId);
+        return ResponseEntity.ok(user);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> deleteUserById(@PathVariable("id") Long userId) throws UserNotFoundException {
+        String responseBody = "Cannot delete User";
+        if(userService.deleteUserById(userId)){
+            responseBody = "Successfully delete User";
+        }
+        return ResponseEntity.ok(responseBody);
     }
 
 
@@ -76,7 +75,4 @@ public class UserControllers {
     public List<User> fetchAllUsers() throws UserNotFoundException{
         return userService.getAllUser();
     }
-
-
-
 }
