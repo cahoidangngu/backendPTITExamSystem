@@ -54,10 +54,6 @@ public class QuestionAnswerServiceImpl implements QuestionAnswerService {
         {
             foundQuestion.setAnswer(answerDTO.getAnswer());
         }
-        if(Objects.nonNull(answerDTO.isCorrect()))
-        {
-            foundQuestion.setCorrect(answerDTO.isCorrect());
-        }
 //        if(Objects.nonNull(answerDTO.getQuestion()))
 //        {
 //            foundQuestion.setQuestion(answerDTO.getQuestion());

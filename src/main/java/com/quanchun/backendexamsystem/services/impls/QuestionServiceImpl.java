@@ -42,11 +42,11 @@ public class QuestionServiceImpl implements QuestionService {
                 .difficulty(theQuestion.getDifficulty())
                 .multianswer(theQuestion.getMultianswer())
                 .category(theQuestion.getCategory())
+                .correctedAnswer(theQuestion.getCorrectedAnswer())
                 .build();
         for(QuestionAnswerDTO answer : theQuestion.getQuestionAnswers())
         {
             QuestionAnswer answer2Add = QuestionAnswer.builder()
-                    .isCorrect(answer.isCorrect())
                     .answer(answer.getAnswer())
                     .build();
             question.addQuestionAnswer(answer2Add);
@@ -97,7 +97,6 @@ public class QuestionServiceImpl implements QuestionService {
             {
                 QuestionAnswer answer = QuestionAnswer.builder()
                         .answer(answerDTO.getAnswer())
-                        .isCorrect(answerDTO.isCorrect())
                         .build();
                 question.getQuestionAnswers().add(answer);
             }
@@ -143,7 +142,6 @@ public class QuestionServiceImpl implements QuestionService {
                 {
                     question.addQuestionAnswer(QuestionAnswer.builder()
                                     .answer(updatedList.get(i).getAnswer())
-                                    .isCorrect(updatedList.get(i).isCorrect())
                             .build());
                     continue;
                 }
@@ -156,7 +154,6 @@ public class QuestionServiceImpl implements QuestionService {
                 QuestionAnswer answer = originalList.get(i);
                 QuestionAnswerDTO dto = updatedList.get(i);
                 answer.setAnswer(dto.getAnswer());
-                answer.setCorrect(dto.isCorrect());
 
             }
         }

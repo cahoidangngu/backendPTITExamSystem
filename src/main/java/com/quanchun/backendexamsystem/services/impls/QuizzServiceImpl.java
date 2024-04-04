@@ -60,6 +60,7 @@ public class QuizzServiceImpl implements QuizzService {
         {
             Question tmp = Question.builder()
                     .category(q.getCategory())
+                    .correctedAnswer(q.getCorrectedAnswer())
                     //.questionAnswers(q.getQuestionAnswers())
                     .questionContent(q.getQuestionContent())
                     .multianswer(q.getMultianswer())

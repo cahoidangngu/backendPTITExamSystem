@@ -19,6 +19,7 @@ public class QuestionDTO {
     private String questionContent;
     private int difficulty;
     private int multianswer;
+    private int correctedAnswer;
     @NotBlank
     private String category;
     private List<QuestionAnswerDTO> questionAnswers;

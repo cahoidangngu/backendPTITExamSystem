@@ -73,6 +73,7 @@ public class QuizzController {
     }
 
     // test ok
+    // role teacher & admin
     @PostMapping("/quizzes")
     public ResponseEntity<Quizz> addNewQuizz(@RequestBody QuizzDTO quizzDTO)
     {
@@ -90,10 +91,4 @@ public class QuizzController {
         quizzService.deleteById(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
-    // maybe when create a quizz just set some basic feature
-    @PostMapping("/add-question/{id}")
-    public ResponseEntity<Quizz> addQuestion2Quizz(@PathVariable("id") int id, @RequestBody List<QuestionDTO> questionDTOS) throws QuizzNotFoundException {
-        return new ResponseEntity<>(quizzService.addQuestions(id, questionDTOS), HttpStatus.OK) ;
-    }
-
 }

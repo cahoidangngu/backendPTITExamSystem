@@ -28,6 +28,8 @@ public class Question {
     private int difficulty;
     @Column(name = "question_multianswer")
     private int multianswer;
+    @Column(name = "correct_answer")
+    private int correctedAnswer;
 
     @ManyToMany(
             fetch = FetchType.LAZY, cascade = {

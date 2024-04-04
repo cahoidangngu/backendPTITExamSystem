@@ -14,6 +14,4 @@ import lombok.NoArgsConstructor;
 @Builder
 public class QuestionAnswerDTO {
     private String answer;
-    @JsonProperty
-    private boolean isCorrect;
 }

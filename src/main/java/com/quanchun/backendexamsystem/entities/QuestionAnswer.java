@@ -19,14 +19,4 @@ public class QuestionAnswer {
     private int qaId;
     @Column(name = "answer")
     private String answer;
-    @Column(name = "is_corrected")
-    private boolean isCorrect;
-
-    public boolean isCorrect() {
-        return isCorrect;
-    }
-
-    public void setCorrect(boolean correct) {
-        isCorrect = correct;
-    }
 }
