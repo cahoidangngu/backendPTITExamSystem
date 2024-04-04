@@ -160,6 +160,7 @@ public class QuizzServiceImpl implements QuizzService {
         return result;
     }
 
+
     @Override
     @Transactional
     public void deleteById(int theId) throws QuizzNotFoundException {

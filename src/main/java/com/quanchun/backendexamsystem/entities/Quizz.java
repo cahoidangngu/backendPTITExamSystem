@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 import java.sql.Date;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 @Data
 @NoArgsConstructor
@@ -41,6 +42,9 @@ public class Quizz {
     private int score;
     @Column(name = "type")
     private int type;
+
+    @OneToMany(mappedBy = "quizz")
+    private Set<RegisterQuizz> registerQuizzes;
 
     @ManyToMany(
             cascade = {CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.DETACH}

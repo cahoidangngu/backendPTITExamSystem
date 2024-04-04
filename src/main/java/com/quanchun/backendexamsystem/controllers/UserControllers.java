@@ -1,16 +1,20 @@
 package com.quanchun.backendexamsystem.controllers;
 
+import com.quanchun.backendexamsystem.entities.RegisterQuizz;
 import com.quanchun.backendexamsystem.entities.Role;
 import com.quanchun.backendexamsystem.entities.User;
+import com.quanchun.backendexamsystem.error.QuizzNotFoundException;
 import com.quanchun.backendexamsystem.error.RoleNotFoundException;
 import com.quanchun.backendexamsystem.error.UserNotFoundException;
 import com.quanchun.backendexamsystem.models.RoleDTO;
 import com.quanchun.backendexamsystem.models.UserDTO;
 import com.quanchun.backendexamsystem.models.UserLoginDTO;
+import com.quanchun.backendexamsystem.services.RegisterQuizzService;
 import com.quanchun.backendexamsystem.services.RoleService;
 import com.quanchun.backendexamsystem.services.UserService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,6 +30,8 @@ public class UserControllers {
     @Autowired
     private RoleService roleService;
 
+    @Autowired
+    private RegisterQuizzService registerService;
 
     @PostMapping("/login")
     public ResponseEntity<String> userLogin(@RequestBody @Valid UserLoginDTO userLogin) throws UserNotFoundException{
@@ -36,6 +42,11 @@ public class UserControllers {
         return ResponseEntity.ok(responseBody);
     }
 
+    @PostMapping("/{id}/register-quizz")
+    public ResponseEntity<RegisterQuizz> register(@RequestBody int quizzId, @RequestParam("id") Long userId) throws UserNotFoundException, QuizzNotFoundException {
+        RegisterQuizz registerQuizz = registerService.registerQuizz(userId, quizzId);
+        return new ResponseEntity<>(registerQuizz, HttpStatus.OK);
+    }
     @PostMapping("/addNewRole")
     public ResponseEntity<String> addNewRole(@RequestBody @Valid RoleDTO newRole){
         Role role = roleService.addNewRole(newRole);

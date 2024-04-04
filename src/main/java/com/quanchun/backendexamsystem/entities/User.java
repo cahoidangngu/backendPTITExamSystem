@@ -28,6 +28,9 @@ public class User {
     private String address;
     private String imagePath;
 
+
+    @OneToMany(mappedBy = "user")
+    private Set<RegisterQuizz> registerQuizzes;
     @ManyToMany(
             cascade = CascadeType.PERSIST
     )

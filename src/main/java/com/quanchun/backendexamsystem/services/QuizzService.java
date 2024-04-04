@@ -22,8 +22,6 @@ public interface QuizzService {
     List<Quizz> getQuizzesByDifficulty(int difficulty);
     List<Quizz> getQuizzesByHostId(int hostId);
 
-
-
     void deleteById(int theId) throws QuizzNotFoundException;
 
 
