@@ -4,11 +4,10 @@ import com.quanchun.backendexamsystem.entities.RegisterQuizz;
 import com.quanchun.backendexamsystem.entities.Role;
 import com.quanchun.backendexamsystem.entities.User;
 import com.quanchun.backendexamsystem.error.QuizzNotFoundException;
+import com.quanchun.backendexamsystem.error.RegisterQuizzNotFoundException;
 import com.quanchun.backendexamsystem.error.RoleNotFoundException;
 import com.quanchun.backendexamsystem.error.UserNotFoundException;
-import com.quanchun.backendexamsystem.models.RoleDTO;
-import com.quanchun.backendexamsystem.models.UserDTO;
-import com.quanchun.backendexamsystem.models.UserLoginDTO;
+import com.quanchun.backendexamsystem.models.*;
 import com.quanchun.backendexamsystem.services.RegisterQuizzService;
 import com.quanchun.backendexamsystem.services.RoleService;
 import com.quanchun.backendexamsystem.services.UserService;
@@ -22,7 +21,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/api/v1/users")
+@RequestMapping("/api/user")
 public class UserControllers {
     @Autowired
     private UserService userService;
@@ -42,11 +41,14 @@ public class UserControllers {
         return ResponseEntity.ok(responseBody);
     }
 
-    @PostMapping("/{id}/register-quizz")
-    public ResponseEntity<RegisterQuizz> register(@RequestBody int quizzId, @RequestParam("id") Long userId) throws UserNotFoundException, QuizzNotFoundException {
+//    test ok
+    @PostMapping("/{userId}/register-quizz/{quizzId}")
+    public ResponseEntity<RegisterQuizz> register(@PathVariable("userId") Long userId, @PathVariable("quizzId") int quizzId) throws UserNotFoundException, QuizzNotFoundException {
         RegisterQuizz registerQuizz = registerService.registerQuizz(userId, quizzId);
         return new ResponseEntity<>(registerQuizz, HttpStatus.OK);
     }
+
+//    test ok
     @PostMapping("/addNewRole")
     public ResponseEntity<String> addNewRole(@RequestBody @Valid RoleDTO newRole){
         Role role = roleService.addNewRole(newRole);
@@ -57,6 +59,7 @@ public class UserControllers {
         return ResponseEntity.ok(responseBody);
     }
 
+//    test ok
     @PostMapping("/addNewUser")
     public ResponseEntity<String> addNewUser(@RequestBody @Valid UserDTO newUser) throws RoleNotFoundException {
         User user = userService.addNewUser(newUser);
@@ -67,6 +70,7 @@ public class UserControllers {
         return ResponseEntity.ok(responseBody);
     }
 
+    // test ok
     @PutMapping("/update/{id}")
     public ResponseEntity<String> updateUserById(@PathVariable("id") Long userId, @RequestBody UserDTO updateUser) throws UserNotFoundException{
         User user = userService.updateUserById(userId, updateUser);
@@ -77,17 +81,29 @@ public class UserControllers {
         return ResponseEntity.ok(responseBody);
     }
 
+    // test ok
     @GetMapping("/{id}")
-    public User fetchUserById(@PathVariable("id") Long userId) throws UserNotFoundException {
-        return userService.getUserById(userId);
+    public ResponseEntity<User> fetchUserById(@PathVariable("id") Long userId) throws UserNotFoundException {
+        return new ResponseEntity<>( userService.getUserById(userId), HttpStatus.OK);
     }
 
-
+    // test ok
     @GetMapping("/list")
-    public List<User> fetchAllUsers() throws UserNotFoundException{
-        return userService.getAllUser();
+    public ResponseEntity<List<User>> fetchAllUsers() throws UserNotFoundException{
+        return new ResponseEntity<>( userService.getAllUser(), HttpStatus.OK);
     }
 
+    // test ok
+    @DeleteMapping("delete/{id}")
+    public ResponseEntity<User> deleteUserById(@PathVariable("id") Long userId) throws UserNotFoundException {
+        return new ResponseEntity<>( userService.deleteUserById(userId), HttpStatus.OK);
+    }
+
+    //test ok
+    @PostMapping("/submit-quizz/{id}")
+    public ResponseEntity<RegisterQuizz> usersubmitQuizzr(@PathVariable("id") int id, @RequestBody SubmitQuizzDTO submitQuizzDTO) throws RegisterQuizzNotFoundException {
+        return new ResponseEntity<>(registerService.submitQuizz(id, submitQuizzDTO), HttpStatus.OK);
+    }
 
 
 }

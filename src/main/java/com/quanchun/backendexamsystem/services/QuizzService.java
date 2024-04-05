@@ -1,8 +1,8 @@
 package com.quanchun.backendexamsystem.services;
 
-import com.quanchun.backendexamsystem.entities.Question;
 import com.quanchun.backendexamsystem.entities.Quizz;
 import com.quanchun.backendexamsystem.error.QuizzNotFoundException;
+import com.quanchun.backendexamsystem.error.UserNotFoundException;
 import com.quanchun.backendexamsystem.models.QuestionDTO;
 import com.quanchun.backendexamsystem.models.QuizzDTO;
 
@@ -13,6 +13,7 @@ public interface QuizzService {
 
     Quizz addQuestions(int id, List<QuestionDTO> questions) throws QuizzNotFoundException;
 
+
     Quizz findQuizzById(int id);
 
     List<Quizz> getAllQuizzes();
@@ -21,6 +22,8 @@ public interface QuizzService {
 
     List<Quizz> getQuizzesByDifficulty(int difficulty);
     List<Quizz> getQuizzesByHostId(int hostId);
+
+
 
     void deleteById(int theId) throws QuizzNotFoundException;
 

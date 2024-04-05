@@ -1,14 +1,15 @@
 package com.quanchun.backendexamsystem.services.impls;
 
-import com.quanchun.backendexamsystem.entities.Quizz;
-import com.quanchun.backendexamsystem.entities.RegisterQuizz;
-import com.quanchun.backendexamsystem.entities.User;
+import com.quanchun.backendexamsystem.entities.*;
 import com.quanchun.backendexamsystem.error.QuizzNotFoundException;
 import com.quanchun.backendexamsystem.error.RegisterQuizzNotFoundException;
 import com.quanchun.backendexamsystem.error.UserNotFoundException;
+import com.quanchun.backendexamsystem.models.SubmitQuizzDTO;
+import com.quanchun.backendexamsystem.models.UserAnswerDTO;
 import com.quanchun.backendexamsystem.repositories.QuizzRepository;
 import com.quanchun.backendexamsystem.repositories.RegisterQuizzRepository;
 import com.quanchun.backendexamsystem.repositories.UserRepository;
+import com.quanchun.backendexamsystem.services.QuestionService;
 import com.quanchun.backendexamsystem.services.RegisterQuizzService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -25,6 +26,9 @@ public class RegisterQuizzServiceImpl implements RegisterQuizzService {
     @Autowired
     private QuizzRepository quizzRepository;
 
+    @Autowired
+    private QuestionService questionService;
+
     @Override
     public RegisterQuizz registerQuizz(Long userId, int quizzId) throws QuizzNotFoundException, UserNotFoundException {
         Quizz quizz = quizzRepository.findById(quizzId)
@@ -35,7 +39,12 @@ public class RegisterQuizzServiceImpl implements RegisterQuizzService {
         // Co the kiem tra xem co phai role user ko thi moi add
 
 
-        RegisterQuizz registerQuizz = new RegisterQuizz(quizz, user, 0, 10, quizz.getStartedAt(), quizz.getEndedAt());
+        RegisterQuizz registerQuizz = RegisterQuizz.builder()
+                .user(user)
+                .quizz(quizz)
+                .startedTime(quizz.getStartedAt())
+                .endTime(quizz.getEndedAt())
+                .build();
         registerQuizzRepository.save(registerQuizz);
         return registerQuizz;
     }
@@ -63,7 +72,7 @@ public class RegisterQuizzServiceImpl implements RegisterQuizzService {
         {
             throw new UserNotFoundException("User with id " + userId + " not found!");
         }
-        List<Quizz> quizzes = quizzRepository.findQuizzesByUsersId(userId);
+        List<Quizz> quizzes = quizzRepository.findQuizzesByUsersUserId(userId);
         return quizzes;
     }
 
@@ -77,4 +86,25 @@ public class RegisterQuizzServiceImpl implements RegisterQuizzService {
         List<User> users = userRepository.findUsersByQuizzesId((long) quizzId);
         return users;
     }
+
+
+    @Override
+    public RegisterQuizz submitQuizz(int id, SubmitQuizzDTO submitQuizzDTO) throws RegisterQuizzNotFoundException {
+        RegisterQuizz registerQuizz = findByRegisterId(id);
+        registerQuizz.setBeginTime(submitQuizzDTO.getBeginTime());
+        registerQuizz.setFinishedTime(submitQuizzDTO.getFinishTime());
+        for(UserAnswerDTO userAnswerDTO : submitQuizzDTO.getUserAnswerDTOList()){
+            Question question = questionService.findQuestionById(userAnswerDTO.getQuestionId());
+            if (question == null) continue;
+            ParticipantAnswer participantAnswer = ParticipantAnswer.builder()
+                    .registerQuizzId(id)
+                    .questionId(question.getId())
+                    .userAnswer(userAnswerDTO.getUserAnswer())
+                    .build();
+            registerQuizz.addParticipantAnswer(participantAnswer);
+        }
+        return registerQuizzRepository.save(registerQuizz);
+    }
+
+
 }

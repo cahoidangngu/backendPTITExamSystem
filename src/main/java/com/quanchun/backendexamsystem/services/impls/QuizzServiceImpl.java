@@ -2,23 +2,23 @@ package com.quanchun.backendexamsystem.services.impls;
 
 import com.quanchun.backendexamsystem.entities.Question;
 import com.quanchun.backendexamsystem.entities.Quizz;
+import com.quanchun.backendexamsystem.entities.User;
 import com.quanchun.backendexamsystem.error.QuizzNotFoundException;
+import com.quanchun.backendexamsystem.error.UserNotFoundException;
 import com.quanchun.backendexamsystem.models.QuestionDTO;
 import com.quanchun.backendexamsystem.models.QuizzDTO;
 import com.quanchun.backendexamsystem.repositories.QuizzRepository;
 import com.quanchun.backendexamsystem.services.QuizzService;
+import com.quanchun.backendexamsystem.services.UserService;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.logging.Logger;
 
 @Service
 public class QuizzServiceImpl implements QuizzService {
@@ -26,6 +26,9 @@ public class QuizzServiceImpl implements QuizzService {
     private QuizzRepository quizzRepository;
     @Autowired
     private EntityManager entityManager;
+
+    @Autowired
+    private UserService userService;
     @Override
     @Transactional
     public Quizz addQuizz(QuizzDTO theQuizz) {
@@ -70,6 +73,8 @@ public class QuizzServiceImpl implements QuizzService {
         }
         return quizz;
     }
+
+
 
     @Override
     public Quizz findQuizzById(int id) {

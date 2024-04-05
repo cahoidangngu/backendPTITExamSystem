@@ -59,6 +59,13 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public User getUserByUsername(String username) throws UserNotFoundException {
+        Optional<User> optionalUser = userRepository.findByUsername(username);
+        if(!optionalUser.isPresent()) throw new UserNotFoundException("Not found user");
+        return optionalUser.get();
+    }
+
+    @Override
     public User updateUserById(Long userId, UserDTO updateUser) throws UserNotFoundException {
         Optional<User> optionalUser = userRepository.findById(userId);
         if (optionalUser.isEmpty()) throw new UserNotFoundException("Not user found");
@@ -97,5 +104,13 @@ public class UserServiceImpl implements UserService {
             return  optionalUser.get().getPassword().equals(userLogin.getPassword());
         }
         return false;
+    }
+
+    @Override
+    public User deleteUserById(Long userId) throws UserNotFoundException {
+        Optional<User> optionalUser = userRepository.findById(userId);
+        if(!optionalUser.isPresent()) throw new UserNotFoundException("Not found user");
+        userRepository.deleteById(userId);
+        return optionalUser.get();
     }
 }

@@ -58,6 +58,15 @@ public class Quizz {
     )
     private List<Question> questions;
 
+    @ManyToMany(
+            cascade = {CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.DETACH}
+    )
+    @JoinTable(
+            name = "take_quizz",
+            joinColumns = @JoinColumn(name = "quizz_id"),
+            inverseJoinColumns = @JoinColumn(name = "user_id")
+    )
+    private List<User> users;
     public void addQuestion(Question question)
     {
         if(questions == null)
@@ -65,5 +74,14 @@ public class Quizz {
             questions = new ArrayList<>();
         }
         questions.add(question);
+    }
+
+    public  void addUser(User user)
+    {
+        if(users == null)
+        {
+            users = new ArrayList<>();
+        }
+        users.add(user);
     }
 }

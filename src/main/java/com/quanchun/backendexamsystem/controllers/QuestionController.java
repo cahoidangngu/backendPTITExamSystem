@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/question")
 public class QuestionController {
     @Autowired
     QuestionService questionService;
@@ -25,17 +25,20 @@ public class QuestionController {
     {
         return  questionService.getAllQuestions();
     }
-    @PostMapping("/questions")
+    // test ok
+    @PostMapping("/add")
     public ResponseEntity<Question> addQuestion(@RequestBody QuestionDTO questionDTO)
     {
         return  new ResponseEntity<>(questionService.addQuestion(questionDTO), HttpStatus.CREATED);
     }
+
     @GetMapping("/quizzes/{quizzId}/questions")
     public ResponseEntity<List<Question>> getAllQuestionsByQuizzId(@PathVariable("quizzId") int id) throws QuizzNotFoundException {
         List<Question> questions = new ArrayList<>();
         questionService.getQuestionsByQuizzId(id).forEach(questions::add);
         return new ResponseEntity<>(questions, HttpStatus.OK);
     }
+
     @PostMapping("/quizzes/{quizzId}/questions")
     public ResponseEntity<Question> addQuestion2Quizz(@PathVariable("quizzId") int quizzId, @RequestBody Question question) throws QuizzNotFoundException {
         return new ResponseEntity<>(questionService.addQuestion2Quizz(quizzId, question), HttpStatus.CREATED);

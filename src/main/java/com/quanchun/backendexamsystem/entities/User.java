@@ -46,7 +46,15 @@ public class User {
             )
     )
     private Set<Role> roles;
-
+    @ManyToMany(
+            cascade = {CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.DETACH}
+    )
+    @JoinTable(
+            name = "take_quizz",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "quizz_id")
+    )
+    private List<Quizz> quizzes;
     public void addRole(Role role){
         if(roles == null)roles = new HashSet<>();
         roles.add(role);

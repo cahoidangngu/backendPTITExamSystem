@@ -1,7 +1,9 @@
 package com.quanchun.backendexamsystem.controllers;
 
 import com.quanchun.backendexamsystem.entities.Quizz;
+import com.quanchun.backendexamsystem.entities.RegisterQuizz;
 import com.quanchun.backendexamsystem.error.QuizzNotFoundException;
+import com.quanchun.backendexamsystem.error.UserNotFoundException;
 import com.quanchun.backendexamsystem.models.QuestionDTO;
 import com.quanchun.backendexamsystem.models.QuizzDTO;
 import com.quanchun.backendexamsystem.services.QuizzService;
@@ -18,7 +20,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/quizz")
 public class QuizzController {
     @Autowired
     private QuizzService quizzService;
@@ -73,7 +75,6 @@ public class QuizzController {
     }
 
     // test ok
-    // role teacher & admin
     @PostMapping("/quizzes")
     public ResponseEntity<Quizz> addNewQuizz(@RequestBody QuizzDTO quizzDTO)
     {
@@ -91,4 +92,12 @@ public class QuizzController {
         quizzService.deleteById(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
+    // maybe when create a quizz just set some basic feature
+    @PostMapping("/add-question/{id}")
+    public ResponseEntity<Quizz> addQuestion2Quizz(@PathVariable("id") int id, @RequestBody List<QuestionDTO> questionDTOS) throws QuizzNotFoundException {
+        return new ResponseEntity<>(quizzService.addQuestions(id, questionDTOS), HttpStatus.OK) ;
+    }
+
+
+
 }
