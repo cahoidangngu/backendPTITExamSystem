@@ -2,10 +2,14 @@ package com.quanchun.backendexamsystem.services.impls;
 
 import com.quanchun.backendexamsystem.entities.Question;
 import com.quanchun.backendexamsystem.entities.Quizz;
+import com.quanchun.backendexamsystem.entities.RegisterQuizz;
+import com.quanchun.backendexamsystem.entities.User;
 import com.quanchun.backendexamsystem.error.QuizzNotFoundException;
+import com.quanchun.backendexamsystem.error.UserNotFoundException;
 import com.quanchun.backendexamsystem.models.QuestionDTO;
 import com.quanchun.backendexamsystem.models.QuizzDTO;
 import com.quanchun.backendexamsystem.repositories.QuizzRepository;
+import com.quanchun.backendexamsystem.repositories.UserRepository;
 import com.quanchun.backendexamsystem.services.QuizzService;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
@@ -15,9 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestBody;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.logging.Logger;
 
 @Service
@@ -26,6 +28,9 @@ public class QuizzServiceImpl implements QuizzService {
     private QuizzRepository quizzRepository;
     @Autowired
     private EntityManager entityManager;
+
+    @Autowired
+    private UserRepository userRepository;
     @Override
     @Transactional
     public Quizz addQuizz(QuizzDTO theQuizz) {
@@ -158,6 +163,21 @@ public class QuizzServiceImpl implements QuizzService {
         request.setParameter("data", hostId);
         List<Quizz> result = request.getResultList();
         return result;
+    }
+
+    @Override
+    public Set<Quizz> getQuizzByUserId(int userId) throws UserNotFoundException {
+        Optional<User> optional = userRepository.findById((long) userId);
+        if(optional.isEmpty())
+        {
+            throw new UserNotFoundException("User with id " + userId + " not found!");
+        }
+        Set<Quizz> results = new HashSet<>();
+        Set<RegisterQuizz> registerQuizzes = optional.get().getRegisterQuizzes();
+        registerQuizzes.forEach(registerQuizz -> {
+            results.add(registerQuizz.getQuizz());
+        });
+        return results;
     }
 
 

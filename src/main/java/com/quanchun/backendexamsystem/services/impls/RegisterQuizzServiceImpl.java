@@ -56,25 +56,4 @@ public class RegisterQuizzServiceImpl implements RegisterQuizzService {
         return null;
     }
 
-    @Override
-    public List<Quizz> getQuizzesByUserId(Long userId) throws UserNotFoundException {
-        Optional<User> optional = userRepository.findById(userId);
-        if(optional.isEmpty())
-        {
-            throw new UserNotFoundException("User with id " + userId + " not found!");
-        }
-        List<Quizz> quizzes = quizzRepository.findQuizzesByUsersId(userId);
-        return quizzes;
-    }
-
-    @Override
-    public List<User> getUsersByQuizzesId(int quizzId) throws QuizzNotFoundException {
-        Optional<Quizz> optional = quizzRepository.findById(quizzId);
-        if(optional.isEmpty())
-        {
-            throw new QuizzNotFoundException("Quizz with id " + quizzId + " not found!");
-        }
-        List<User> users = userRepository.findUsersByQuizzesId((long) quizzId);
-        return users;
-    }
 }

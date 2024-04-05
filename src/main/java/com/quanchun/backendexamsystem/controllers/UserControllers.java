@@ -1,5 +1,6 @@
 package com.quanchun.backendexamsystem.controllers;
 
+import com.quanchun.backendexamsystem.entities.Quizz;
 import com.quanchun.backendexamsystem.entities.RegisterQuizz;
 import com.quanchun.backendexamsystem.entities.Role;
 import com.quanchun.backendexamsystem.entities.User;
@@ -9,6 +10,7 @@ import com.quanchun.backendexamsystem.error.UserNotFoundException;
 import com.quanchun.backendexamsystem.models.RoleDTO;
 import com.quanchun.backendexamsystem.models.UserDTO;
 import com.quanchun.backendexamsystem.models.UserLoginDTO;
+import com.quanchun.backendexamsystem.services.QuizzService;
 import com.quanchun.backendexamsystem.services.RegisterQuizzService;
 import com.quanchun.backendexamsystem.services.RoleService;
 import com.quanchun.backendexamsystem.services.UserService;
@@ -20,6 +22,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/api/v1/users")
@@ -32,6 +35,9 @@ public class UserControllers {
 
     @Autowired
     private RegisterQuizzService registerService;
+
+    @Autowired
+    private QuizzService quizzService;
 
     @PostMapping("/login")
     public ResponseEntity<String> userLogin(@RequestBody @Valid UserLoginDTO userLogin) throws UserNotFoundException{
@@ -67,6 +73,15 @@ public class UserControllers {
         return ResponseEntity.ok(responseBody);
     }
 
+    @GetMapping("/{id}/quizzes")
+    public ResponseEntity<Set<Quizz>> getQuizzesByUserId(@RequestParam("id") int userId) throws UserNotFoundException {
+        Set<Quizz> results = quizzService.getQuizzByUserId(userId);
+        if(results.isEmpty())
+        {
+
+        }
+        return new ResponseEntity<>(results, HttpStatus.OK);
+    }
     @PutMapping("/update/{id}")
     public ResponseEntity<String> updateUserById(@PathVariable("id") Long userId, @RequestBody UserDTO updateUser) throws UserNotFoundException{
         User user = userService.updateUserById(userId, updateUser);

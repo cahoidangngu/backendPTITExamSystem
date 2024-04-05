@@ -15,7 +15,4 @@ public interface RegisterQuizzService {
 
     RegisterQuizz deleteByRegisterId(int id);
 
-    List<Quizz> getQuizzesByUserId(Long userId) throws UserNotFoundException;
-
-    List<User> getUsersByQuizzesId(int quizzId) throws QuizzNotFoundException;
 }
