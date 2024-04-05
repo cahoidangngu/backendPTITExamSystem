@@ -55,6 +55,7 @@ public class QuestionController {
     {
         return questionService.findQuestionById(id);
     }
+
     // test ok
     @DeleteMapping("/deleted/{id}")
     public ResponseEntity<Question> deleteQuestionById(@PathVariable("id") int id) throws QuestionNotFoundException {
