@@ -3,12 +3,16 @@ package com.quanchun.backendexamsystem.services.impls;
 import com.quanchun.backendexamsystem.entities.Question;
 import com.quanchun.backendexamsystem.entities.QuestionAnswer;
 import com.quanchun.backendexamsystem.entities.Quizz;
+import com.quanchun.backendexamsystem.entities.User;
 import com.quanchun.backendexamsystem.error.QuestionNotFoundException;
 import com.quanchun.backendexamsystem.error.QuizzNotFoundException;
+import com.quanchun.backendexamsystem.mappers.UserMapper;
 import com.quanchun.backendexamsystem.models.QuestionAnswerDTO;
 import com.quanchun.backendexamsystem.models.QuestionDTO;
+import com.quanchun.backendexamsystem.models.UserDTO;
 import com.quanchun.backendexamsystem.repositories.QuestionRepository;
 import com.quanchun.backendexamsystem.repositories.QuizzRepository;
+import com.quanchun.backendexamsystem.repositories.UserRepository;
 import com.quanchun.backendexamsystem.services.QuestionService;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
@@ -212,4 +216,6 @@ public class QuestionServiceImpl implements QuestionService {
         List<Question> questions = questionRepository.findQuestionsByQuizzesId(quizzId);
         return questions;
     }
+
+
 }

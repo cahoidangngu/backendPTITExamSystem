@@ -2,11 +2,14 @@ package com.quanchun.backendexamsystem.services.impls;
 
 import com.quanchun.backendexamsystem.entities.Question;
 import com.quanchun.backendexamsystem.entities.Quizz;
+import com.quanchun.backendexamsystem.entities.RegisterQuizz;
 import com.quanchun.backendexamsystem.entities.User;
 import com.quanchun.backendexamsystem.error.QuizzNotFoundException;
 import com.quanchun.backendexamsystem.error.UserNotFoundException;
+import com.quanchun.backendexamsystem.mappers.UserMapper;
 import com.quanchun.backendexamsystem.models.QuestionDTO;
 import com.quanchun.backendexamsystem.models.QuizzDTO;
+import com.quanchun.backendexamsystem.models.UserDTO;
 import com.quanchun.backendexamsystem.repositories.QuizzRepository;
 import com.quanchun.backendexamsystem.services.QuizzService;
 import com.quanchun.backendexamsystem.services.UserService;
@@ -19,6 +22,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class QuizzServiceImpl implements QuizzService {
@@ -181,5 +186,24 @@ public class QuizzServiceImpl implements QuizzService {
 
         }
         quizzRepository.deleteById(theId);
+    }
+
+    @Override
+    public List<UserDTO> getUsersByQuizzesId(int quizzId) throws QuizzNotFoundException {
+        Optional<Quizz> optional = quizzRepository.findById(quizzId);
+        if(optional.isEmpty())
+        {
+            throw new QuizzNotFoundException("Quizz with id " + quizzId + " not found!");
+        }
+        Quizz quizz = optional.get();
+
+//         users = optional.get().getUsers();
+        List<User> users = quizz.getRegisterQuizzes().stream()
+                        .map(RegisterQuizz::getUser)
+                        .collect(Collectors.toList());
+        System.out.println(users.size() + "");
+        System.out.println(users.get(users.size() - 1).toString());
+        // mapper
+        return UserMapper.MAPPER.toResponses(users);
     }
 }

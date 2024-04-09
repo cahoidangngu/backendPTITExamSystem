@@ -8,6 +8,7 @@ import com.quanchun.backendexamsystem.error.QuizzNotFoundException;
 import com.quanchun.backendexamsystem.error.UserNotFoundException;
 import com.quanchun.backendexamsystem.models.QuestionAnswerDTO;
 import com.quanchun.backendexamsystem.models.QuestionDTO;
+import com.quanchun.backendexamsystem.models.UserDTO;
 
 import java.util.List;
 
@@ -27,5 +28,6 @@ public interface QuestionService {
     List<Question> getAllQuestions();
 
     List<Question> getQuestionsByQuizzId(int quizzId) throws QuizzNotFoundException;
+
 
 }

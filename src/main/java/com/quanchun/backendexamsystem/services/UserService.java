@@ -1,9 +1,11 @@
 package com.quanchun.backendexamsystem.services;
 
+import com.quanchun.backendexamsystem.entities.Quizz;
 import com.quanchun.backendexamsystem.entities.RegisterQuizz;
 import com.quanchun.backendexamsystem.entities.User;
 import com.quanchun.backendexamsystem.error.RoleNotFoundException;
 import com.quanchun.backendexamsystem.error.UserNotFoundException;
+import com.quanchun.backendexamsystem.models.QuizzDTO;
 import com.quanchun.backendexamsystem.models.UserDTO;
 import com.quanchun.backendexamsystem.models.UserLoginDTO;
 
@@ -15,7 +17,7 @@ public interface UserService {
     List<User> getAllUser() throws UserNotFoundException;
 
     User getUserById(Long userId) throws UserNotFoundException;
-
+    List<QuizzDTO> getQuizzesByUserId(Long userId) throws UserNotFoundException;
     User getUserByUsername(String username) throws UserNotFoundException;
 
     User updateUserById(Long userId, UserDTO updateUser) throws UserNotFoundException;

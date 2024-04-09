@@ -4,6 +4,7 @@ import com.quanchun.backendexamsystem.entities.*;
 import com.quanchun.backendexamsystem.error.QuizzNotFoundException;
 import com.quanchun.backendexamsystem.error.RegisterQuizzNotFoundException;
 import com.quanchun.backendexamsystem.error.UserNotFoundException;
+import com.quanchun.backendexamsystem.models.RegisterQuizzDTO;
 import com.quanchun.backendexamsystem.models.SubmitQuizzDTO;
 import com.quanchun.backendexamsystem.models.UserAnswerDTO;
 import com.quanchun.backendexamsystem.repositories.QuizzRepository;
@@ -30,23 +31,34 @@ public class RegisterQuizzServiceImpl implements RegisterQuizzService {
     private QuestionService questionService;
 
     @Override
-    public RegisterQuizz registerQuizz(Long userId, int quizzId) throws QuizzNotFoundException, UserNotFoundException {
+    public RegisterQuizzDTO registerQuizz(Long userId, int quizzId) throws QuizzNotFoundException, UserNotFoundException {
         Quizz quizz = quizzRepository.findById(quizzId)
                 .orElseThrow(() -> new QuizzNotFoundException("Quizz with id " + quizzId + " not found!"));
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException("User with id " + userId + " not found!"));
 
         // Co the kiem tra xem co phai role user ko thi moi add
-
-
+//        quizz.addUser(user);
+//        user.addQuizz(quizz);
         RegisterQuizz registerQuizz = RegisterQuizz.builder()
                 .user(user)
                 .quizz(quizz)
                 .startedTime(quizz.getStartedAt())
                 .endTime(quizz.getEndedAt())
+                .score(0)
+                .status(0)
                 .build();
+        RegisterQuizzDTO registerQuizzDTO = RegisterQuizzDTO.builder()
+                .userFullName(user.getFullName())
+                .quizzTitle(quizz.getTitle())
+                .startedTime(quizz.getStartedAt())
+                .endTime(quizz.getEndedAt())
+                .studyClass(user.getStudyClass())
+                .build();
+        quizz.addRegisterQuizz(registerQuizz);
+        user.addRegisterQuizz(registerQuizz);
         registerQuizzRepository.save(registerQuizz);
-        return registerQuizz;
+        return registerQuizzDTO;
     }
 
     @Override
@@ -65,34 +77,44 @@ public class RegisterQuizzServiceImpl implements RegisterQuizzService {
         return null;
     }
 
-    @Override
-    public List<Quizz> getQuizzesByUserId(Long userId) throws UserNotFoundException {
-        Optional<User> optional = userRepository.findById(userId);
-        if(optional.isEmpty())
-        {
-            throw new UserNotFoundException("User with id " + userId + " not found!");
-        }
-        List<Quizz> quizzes = quizzRepository.findQuizzesByUsersUserId(userId);
-        return quizzes;
+
+    /*
+    * Submit quizz
+    *  + Lưu lại giá trị vào bảng
+    *  + So sánh kq để tính toán ra điểm cũng như viết 1 dto trả về kiểu: (paste ra jsonformatter)
+    *  {
+  "username": "dtn",
+  "studyClass": "E03",
+  "quizzname": "bla bla",
+  "startedTime": "....",
+  "endedTime": "....",
+  "participantAnswer":
+  [
+    {
+      "questionId": 18,
+      "userAnswer": 1,
+      "correctedAnswer": 0
+    },
+    {
+      "questionId": 17,
+      "userAnswer": 3,
+      "correctedAnswer": 2
     }
-
-    @Override
-    public List<User> getUsersByQuizzesId(int quizzId) throws QuizzNotFoundException {
-        Optional<Quizz> optional = quizzRepository.findById(quizzId);
-        if(optional.isEmpty())
-        {
-            throw new QuizzNotFoundException("Quizz with id " + quizzId + " not found!");
-        }
-        List<User> users = userRepository.findUsersByQuizzesId((long) quizzId);
-        return users;
-    }
-
-
+  ]
+}
+    *  + update lại registerquizz do ban dau score = 0
+    *
+    * */
     @Override
     public RegisterQuizz submitQuizz(int id, SubmitQuizzDTO submitQuizzDTO) throws RegisterQuizzNotFoundException {
         RegisterQuizz registerQuizz = findByRegisterId(id);
+        /*
+        * BeginTime front lấy khi user bấm làm bài
+        * FinishedTime front lấy khi user bấm submit
+        * */
         registerQuizz.setBeginTime(submitQuizzDTO.getBeginTime());
         registerQuizz.setFinishedTime(submitQuizzDTO.getFinishTime());
+
         for(UserAnswerDTO userAnswerDTO : submitQuizzDTO.getUserAnswerDTOList()){
             Question question = questionService.findQuestionById(userAnswerDTO.getQuestionId());
             if (question == null) continue;

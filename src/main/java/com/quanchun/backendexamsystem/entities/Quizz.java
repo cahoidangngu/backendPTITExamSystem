@@ -1,14 +1,14 @@
 package com.quanchun.backendexamsystem.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.sql.Date;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -22,6 +22,7 @@ public class Quizz {
     @Column(name = "quizz_id")
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @JsonIgnore
     private int id;
     @Column(name = "host_id")
     private int hostId;
@@ -44,7 +45,7 @@ public class Quizz {
     private int type;
 
     @OneToMany(mappedBy = "quizz")
-    private Set<RegisterQuizz> registerQuizzes;
+    private List<RegisterQuizz> registerQuizzes;
 
     @ManyToMany(
             cascade = {CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.DETACH}
@@ -58,15 +59,15 @@ public class Quizz {
     )
     private List<Question> questions;
 
-    @ManyToMany(
-            cascade = {CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.DETACH}
-    )
-    @JoinTable(
-            name = "take_quizz",
-            joinColumns = @JoinColumn(name = "quizz_id"),
-            inverseJoinColumns = @JoinColumn(name = "user_id")
-    )
-    private List<User> users;
+//    @ManyToMany(
+//            cascade = {CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.DETACH}
+//    )
+//    @JoinTable(
+//            name = "take_quizz",
+//            joinColumns = @JoinColumn(name = "quizz_id"),
+//            inverseJoinColumns = @JoinColumn(name = "user_id")
+//    )
+//    private List<User> users;
     public void addQuestion(Question question)
     {
         if(questions == null)
@@ -76,12 +77,14 @@ public class Quizz {
         questions.add(question);
     }
 
-    public  void addUser(User user)
+    public void addRegisterQuizz(RegisterQuizz rq)
     {
-        if(users == null)
+        if(registerQuizzes == null)
         {
-            users = new ArrayList<>();
+            registerQuizzes = new ArrayList<>();
         }
-        users.add(user);
+        registerQuizzes.add(rq);
     }
+
+
 }

@@ -1,5 +1,6 @@
 package com.quanchun.backendexamsystem.controllers;
 
+import com.quanchun.backendexamsystem.entities.Quizz;
 import com.quanchun.backendexamsystem.entities.RegisterQuizz;
 import com.quanchun.backendexamsystem.entities.Role;
 import com.quanchun.backendexamsystem.entities.User;
@@ -17,6 +18,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -43,8 +45,8 @@ public class UserControllers {
 
 //    test ok
     @PostMapping("/{userId}/register-quizz/{quizzId}")
-    public ResponseEntity<RegisterQuizz> register(@PathVariable("userId") Long userId, @PathVariable("quizzId") int quizzId) throws UserNotFoundException, QuizzNotFoundException {
-        RegisterQuizz registerQuizz = registerService.registerQuizz(userId, quizzId);
+    public ResponseEntity<RegisterQuizzDTO> register(@PathVariable("userId") Long userId, @PathVariable("quizzId") int quizzId) throws UserNotFoundException, QuizzNotFoundException {
+        RegisterQuizzDTO registerQuizz = registerService.registerQuizz(userId, quizzId);
         return new ResponseEntity<>(registerQuizz, HttpStatus.OK);
     }
 
@@ -93,6 +95,12 @@ public class UserControllers {
         return new ResponseEntity<>( userService.getAllUser(), HttpStatus.OK);
     }
 
+    // test ok but we need to mapper a dto not to show too much information
+    @GetMapping("/{userId}/quizzes")
+    public ResponseEntity<List<QuizzDTO>> getQuizzes4StudentId(@PathVariable("userId") int userId) throws UserNotFoundException {
+        return new ResponseEntity<>(userService.getQuizzesByUserId((long) userId), HttpStatus.OK);
+    }
+
     // test ok
     @DeleteMapping("delete/{id}")
     public ResponseEntity<User> deleteUserById(@PathVariable("id") Long userId) throws UserNotFoundException {
@@ -104,6 +112,7 @@ public class UserControllers {
     public ResponseEntity<RegisterQuizz> usersubmitQuizzr(@PathVariable("id") int id, @RequestBody SubmitQuizzDTO submitQuizzDTO) throws RegisterQuizzNotFoundException {
         return new ResponseEntity<>(registerService.submitQuizz(id, submitQuizzDTO), HttpStatus.OK);
     }
+
 
 
 }

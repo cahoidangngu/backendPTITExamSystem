@@ -1,11 +1,16 @@
 package com.quanchun.backendexamsystem.services.impls;
 
+import com.quanchun.backendexamsystem.entities.Quizz;
+import com.quanchun.backendexamsystem.entities.RegisterQuizz;
 import com.quanchun.backendexamsystem.entities.Role;
 import com.quanchun.backendexamsystem.entities.User;
 import com.quanchun.backendexamsystem.error.RoleNotFoundException;
 import com.quanchun.backendexamsystem.error.UserNotFoundException;
+import com.quanchun.backendexamsystem.mappers.QuizzMapper;
+import com.quanchun.backendexamsystem.models.QuizzDTO;
 import com.quanchun.backendexamsystem.models.UserDTO;
 import com.quanchun.backendexamsystem.models.UserLoginDTO;
+import com.quanchun.backendexamsystem.repositories.QuizzRepository;
 import com.quanchun.backendexamsystem.repositories.RoleRepository;
 import com.quanchun.backendexamsystem.repositories.UserRepository;
 import com.quanchun.backendexamsystem.services.RoleService;
@@ -17,13 +22,15 @@ import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class UserServiceImpl implements UserService {
 
     @Autowired
     private UserRepository userRepository;
-
+    @Autowired
+    private QuizzRepository quizzRepository;
     @Autowired
     private RoleService roleService;
 
@@ -56,6 +63,20 @@ public class UserServiceImpl implements UserService {
         Optional<User> optionalUser = userRepository.findById(userId);
         if(!optionalUser.isPresent()) throw new UserNotFoundException("Not found user");
         return optionalUser.get();
+    }
+
+    @Override
+    public List<QuizzDTO> getQuizzesByUserId(Long userId) throws UserNotFoundException {
+        Optional<User> optional = userRepository.findById(userId);
+        if(optional.isEmpty())
+        {
+            throw new UserNotFoundException("User with id " + userId + " not found!");
+        }
+        List<Quizz> quizzes = optional.get().getRegisterQuizzes()
+                .stream().map(RegisterQuizz::getQuizz)
+                .collect(Collectors.toList());
+
+        return QuizzMapper.MAPPER.toResponses(quizzes);
     }
 
     @Override

@@ -6,6 +6,7 @@ import com.quanchun.backendexamsystem.error.QuizzNotFoundException;
 import com.quanchun.backendexamsystem.error.UserNotFoundException;
 import com.quanchun.backendexamsystem.models.QuestionDTO;
 import com.quanchun.backendexamsystem.models.QuizzDTO;
+import com.quanchun.backendexamsystem.models.UserDTO;
 import com.quanchun.backendexamsystem.services.QuizzService;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -74,6 +75,7 @@ public class QuizzController {
         return quizzes;
     }
 
+
     // test ok
     @PostMapping("/quizzes")
     public ResponseEntity<Quizz> addNewQuizz(@RequestBody QuizzDTO quizzDTO)
@@ -98,6 +100,11 @@ public class QuizzController {
         return new ResponseEntity<>(quizzService.addQuestions(id, questionDTOS), HttpStatus.OK) ;
     }
 
+    // test ok
+    @GetMapping("/{quizzId}/users")
+    public ResponseEntity<List<UserDTO>> getUserByQuizzId(@PathVariable("quizzId") int quizzId) throws QuizzNotFoundException {
+        return new ResponseEntity<>(quizzService.getUsersByQuizzesId(quizzId), HttpStatus.OK);
+    }
 
 
 }
