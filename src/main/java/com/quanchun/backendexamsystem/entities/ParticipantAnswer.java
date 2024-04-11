@@ -28,7 +28,4 @@ public class ParticipantAnswer {
 
     @NotNull
     private int userAnswer;
-
-
-
 }
