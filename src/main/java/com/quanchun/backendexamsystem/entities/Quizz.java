@@ -1,6 +1,7 @@
 package com.quanchun.backendexamsystem.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
@@ -44,7 +45,8 @@ public class Quizz {
     @Column(name = "type")
     private int type;
 
-    @OneToMany(mappedBy = "quizz")
+    @JsonManagedReference
+    @OneToMany(mappedBy = "quizz",cascade = CascadeType.ALL, orphanRemoval = true)
     private List<RegisterQuizz> registerQuizzes;
 
     @ManyToMany(

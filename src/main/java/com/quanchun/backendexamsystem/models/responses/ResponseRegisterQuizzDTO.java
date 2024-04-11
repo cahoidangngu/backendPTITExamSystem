@@ -1,4 +1,4 @@
-package com.quanchun.backendexamsystem.models;
+package com.quanchun.backendexamsystem.models.responses;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -7,13 +7,15 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
 @Builder
 @AllArgsConstructor
-public class RegisterQuizzDTO {
+public class ResponseRegisterQuizzDTO {
     @NotNull
     @NotBlank
     private String quizzTitle;
@@ -28,4 +30,10 @@ public class RegisterQuizzDTO {
     private String studyClass;
     private int status;
     private int score;
+    private List<ResponseAnswerQuestionDTO> quizzQuestions;
+
+    public void addQuizzQuestion(ResponseAnswerQuestionDTO responseAnswerQuestionDTO){
+        if(quizzQuestions == null) quizzQuestions = new ArrayList<>();
+        quizzQuestions.add(responseAnswerQuestionDTO);
+    }
 }

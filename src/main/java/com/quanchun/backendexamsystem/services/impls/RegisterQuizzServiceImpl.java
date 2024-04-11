@@ -4,7 +4,9 @@ import com.quanchun.backendexamsystem.entities.*;
 import com.quanchun.backendexamsystem.error.QuizzNotFoundException;
 import com.quanchun.backendexamsystem.error.RegisterQuizzNotFoundException;
 import com.quanchun.backendexamsystem.error.UserNotFoundException;
-import com.quanchun.backendexamsystem.models.RegisterQuizzDTO;
+import com.quanchun.backendexamsystem.models.QuestionAnswerDTO;
+import com.quanchun.backendexamsystem.models.responses.ResponseAnswerQuestionDTO;
+import com.quanchun.backendexamsystem.models.responses.ResponseRegisterQuizzDTO;
 import com.quanchun.backendexamsystem.models.SubmitQuizzDTO;
 import com.quanchun.backendexamsystem.models.UserAnswerDTO;
 import com.quanchun.backendexamsystem.repositories.QuizzRepository;
@@ -12,13 +14,19 @@ import com.quanchun.backendexamsystem.repositories.RegisterQuizzRepository;
 import com.quanchun.backendexamsystem.repositories.UserRepository;
 import com.quanchun.backendexamsystem.services.QuestionService;
 import com.quanchun.backendexamsystem.services.RegisterQuizzService;
+import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
+@Slf4j
 public class RegisterQuizzServiceImpl implements RegisterQuizzService {
     @Autowired
     private RegisterQuizzRepository registerQuizzRepository;
@@ -30,8 +38,55 @@ public class RegisterQuizzServiceImpl implements RegisterQuizzService {
     @Autowired
     private QuestionService questionService;
 
+
+    private Logger logger = LoggerFactory.getLogger(RegisterQuizzService.class);
+
+    private int scoreCaculator(RegisterQuizz registerQuizz){
+        AtomicInteger numberRightAnswer = new AtomicInteger(registerQuizz.getScore());
+        registerQuizz.getParticipantAnswerList().forEach(participantAnswer -> {
+            int correctAnswer = questionService.findQuestionById(participantAnswer.getQuestionId()).getCorrectedAnswer();
+            if(correctAnswer == participantAnswer.getUserAnswer()){
+                numberRightAnswer.set(numberRightAnswer.get() + 1);
+            }
+        });
+        double numberAnswer = registerQuizz.getQuizz().getQuestions().size();
+        return (int)((10f/numberAnswer)* (double)numberRightAnswer.get());
+    }
+
+    private ResponseRegisterQuizzDTO RegisterQuizz2ResponseDTO(RegisterQuizz registerQuizz) {
+        ResponseRegisterQuizzDTO registerQuizzDTO = ResponseRegisterQuizzDTO.builder()
+                .userFullName(registerQuizz.getUser().getFullName())
+                .quizzTitle(registerQuizz.getQuizz().getTitle())
+                .startedTime(registerQuizz.getQuizz().getStartedAt())
+                .endTime(registerQuizz.getQuizz().getEndedAt())
+                .studyClass(registerQuizz.getUser().getStudyClass())
+                .build();
+        if (registerQuizz.getParticipantAnswerList() == null) return registerQuizzDTO;
+                registerQuizzDTO.setBeginTime(registerQuizz.getBeginTime());
+                registerQuizzDTO.setFinishedTime(registerQuizz.getFinishedTime());
+                registerQuizzDTO.setScore(registerQuizz.getScore());
+        registerQuizz.getParticipantAnswerList().forEach(participantAnswer -> {
+            Question question = questionService.findQuestionById(participantAnswer.getQuestionId());
+            List<QuestionAnswerDTO> questionAnswersDTO = new ArrayList<>();
+            question.getQuestionAnswers().forEach(questionAnswer -> questionAnswersDTO.add(
+                    QuestionAnswerDTO.builder().answer(questionAnswer.getAnswer()).build()
+            ));
+            registerQuizzDTO.addQuizzQuestion(ResponseAnswerQuestionDTO.builder()
+                    .questionContent(question.getQuestionContent())
+                    .difficulty(question.getDifficulty())
+                    .multianswer(question.getMultianswer())
+                    .correctedAnswer(question.getCorrectedAnswer())
+                    .userAnswer(participantAnswer.getUserAnswer())
+                    .category(question.getCategory())
+                    .questionAnswers(questionAnswersDTO)
+                    .build());
+        });
+        return registerQuizzDTO;
+    }
+
+
     @Override
-    public RegisterQuizzDTO registerQuizz(Long userId, int quizzId) throws QuizzNotFoundException, UserNotFoundException {
+    public ResponseRegisterQuizzDTO registerQuizz(Long userId, int quizzId) throws QuizzNotFoundException, UserNotFoundException {
         Quizz quizz = quizzRepository.findById(quizzId)
                 .orElseThrow(() -> new QuizzNotFoundException("Quizz with id " + quizzId + " not found!"));
         User user = userRepository.findById(userId)
@@ -48,17 +103,10 @@ public class RegisterQuizzServiceImpl implements RegisterQuizzService {
                 .score(0)
                 .status(0)
                 .build();
-        RegisterQuizzDTO registerQuizzDTO = RegisterQuizzDTO.builder()
-                .userFullName(user.getFullName())
-                .quizzTitle(quizz.getTitle())
-                .startedTime(quizz.getStartedAt())
-                .endTime(quizz.getEndedAt())
-                .studyClass(user.getStudyClass())
-                .build();
         quizz.addRegisterQuizz(registerQuizz);
         user.addRegisterQuizz(registerQuizz);
         registerQuizzRepository.save(registerQuizz);
-        return registerQuizzDTO;
+        return RegisterQuizz2ResponseDTO(registerQuizz);
     }
 
     @Override
@@ -106,7 +154,7 @@ public class RegisterQuizzServiceImpl implements RegisterQuizzService {
     *
     * */
     @Override
-    public RegisterQuizz submitQuizz(int id, SubmitQuizzDTO submitQuizzDTO) throws RegisterQuizzNotFoundException {
+    public ResponseRegisterQuizzDTO submitQuizz(int id, SubmitQuizzDTO submitQuizzDTO) throws RegisterQuizzNotFoundException {
         RegisterQuizz registerQuizz = findByRegisterId(id);
         /*
         * BeginTime front lấy khi user bấm làm bài
@@ -114,7 +162,7 @@ public class RegisterQuizzServiceImpl implements RegisterQuizzService {
         * */
         registerQuizz.setBeginTime(submitQuizzDTO.getBeginTime());
         registerQuizz.setFinishedTime(submitQuizzDTO.getFinishTime());
-
+        logger.info(submitQuizzDTO.getUserAnswerDTOList().toString());
         for(UserAnswerDTO userAnswerDTO : submitQuizzDTO.getUserAnswerDTOList()){
             Question question = questionService.findQuestionById(userAnswerDTO.getQuestionId());
             if (question == null) continue;
@@ -125,7 +173,8 @@ public class RegisterQuizzServiceImpl implements RegisterQuizzService {
                     .build();
             registerQuizz.addParticipantAnswer(participantAnswer);
         }
-        return registerQuizzRepository.save(registerQuizz);
+        registerQuizz.setScore(scoreCaculator(registerQuizz));
+        return RegisterQuizz2ResponseDTO(registerQuizzRepository.save(registerQuizz));
     }
 
 
