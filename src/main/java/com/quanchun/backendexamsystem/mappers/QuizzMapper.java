@@ -15,7 +15,7 @@ public interface QuizzMapper {
     QuizzMapper MAPPER = Mappers.getMapper(QuizzMapper.class);
     @Named("toResponse")
     @Mappings({
-        @Mapping(target = "questions", ignore = true)
+        @Mapping(source = "questions", target = "questions", ignore = true)
     })
     QuizzDTO quizz2QuizzDTO(Quizz quizz);
 

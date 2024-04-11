@@ -15,7 +15,7 @@ import java.util.*;
 @Table(name="users")
 public class User {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long userId;
     @Column(unique = true)
     private String username;
@@ -29,7 +29,7 @@ public class User {
     private String imagePath;
 
 
-    @OneToMany(mappedBy = "user")
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<RegisterQuizz> registerQuizzes;
     @ManyToMany(
             cascade = CascadeType.PERSIST

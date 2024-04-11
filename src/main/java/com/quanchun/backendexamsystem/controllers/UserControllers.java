@@ -1,6 +1,5 @@
 package com.quanchun.backendexamsystem.controllers;
 
-import com.quanchun.backendexamsystem.entities.Quizz;
 import com.quanchun.backendexamsystem.entities.RegisterQuizz;
 import com.quanchun.backendexamsystem.entities.Role;
 import com.quanchun.backendexamsystem.entities.User;
@@ -9,6 +8,7 @@ import com.quanchun.backendexamsystem.error.RegisterQuizzNotFoundException;
 import com.quanchun.backendexamsystem.error.RoleNotFoundException;
 import com.quanchun.backendexamsystem.error.UserNotFoundException;
 import com.quanchun.backendexamsystem.models.*;
+import com.quanchun.backendexamsystem.models.responses.ResponseRegisterQuizzDTO;
 import com.quanchun.backendexamsystem.services.RegisterQuizzService;
 import com.quanchun.backendexamsystem.services.RoleService;
 import com.quanchun.backendexamsystem.services.UserService;
@@ -18,9 +18,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/user")
@@ -45,8 +43,8 @@ public class UserControllers {
 
 //    test ok
     @PostMapping("/{userId}/register-quizz/{quizzId}")
-    public ResponseEntity<RegisterQuizzDTO> register(@PathVariable("userId") Long userId, @PathVariable("quizzId") int quizzId) throws UserNotFoundException, QuizzNotFoundException {
-        RegisterQuizzDTO registerQuizz = registerService.registerQuizz(userId, quizzId);
+    public ResponseEntity<ResponseRegisterQuizzDTO> register(@PathVariable("userId") Long userId, @PathVariable("quizzId") int quizzId) throws UserNotFoundException, QuizzNotFoundException {
+        ResponseRegisterQuizzDTO registerQuizz = registerService.registerQuizz(userId, quizzId);
         return new ResponseEntity<>(registerQuizz, HttpStatus.OK);
     }
 
@@ -109,7 +107,7 @@ public class UserControllers {
 
     //test ok
     @PostMapping("/submit-quizz/{id}")
-    public ResponseEntity<RegisterQuizz> usersubmitQuizzr(@PathVariable("id") int id, @RequestBody SubmitQuizzDTO submitQuizzDTO) throws RegisterQuizzNotFoundException {
+    public ResponseEntity<ResponseRegisterQuizzDTO> userSubmitQuizz(@PathVariable("id") int id, @RequestBody SubmitQuizzDTO submitQuizzDTO) throws RegisterQuizzNotFoundException {
         return new ResponseEntity<>(registerService.submitQuizz(id, submitQuizzDTO), HttpStatus.OK);
     }
 

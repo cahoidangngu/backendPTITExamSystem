@@ -1,6 +1,7 @@
 package com.quanchun.backendexamsystem.entities;
 
 import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -11,6 +12,7 @@ import java.util.Objects;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Embeddable
 public class ParticipantAnswerId implements Serializable {
 
     @Column(name = "register_question_id")

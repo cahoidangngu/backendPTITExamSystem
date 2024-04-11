@@ -1,5 +1,6 @@
 package com.quanchun.backendexamsystem.entities;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 import org.yaml.snakeyaml.events.Event;
@@ -20,15 +21,17 @@ public class RegisterQuizz {
     @Id
     @Column(name = "register_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    int registerId;
+    private int registerId;
 
-    @ManyToOne
+    @JsonBackReference
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "quizz_id")
-    Quizz quizz;
+    private Quizz quizz;
 
-    @ManyToOne
+    @JsonBackReference
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
-    User user;
+    private User user;
 
     @Column(name = "status")
     private int status;
@@ -66,8 +69,6 @@ public class RegisterQuizz {
     public void addParticipantAnswer(ParticipantAnswer participantAnswer){
         if(participantAnswerList==null) participantAnswerList = new ArrayList<>();
         participantAnswerList.add(participantAnswer);
-        participantAnswerList.contains(participantAnswer);
     }
-
 
 }
