@@ -2,6 +2,7 @@ package com.quanchun.backendexamsystem.controllers;
 
 import com.quanchun.backendexamsystem.entities.Quizz;
 import com.quanchun.backendexamsystem.entities.RegisterQuizz;
+import com.quanchun.backendexamsystem.error.QuizzExistsException;
 import com.quanchun.backendexamsystem.error.QuizzNotFoundException;
 import com.quanchun.backendexamsystem.error.UserNotFoundException;
 import com.quanchun.backendexamsystem.models.QuestionDTO;
@@ -41,7 +42,7 @@ public class QuizzController {
 
     // test ok
     @GetMapping("/quizzes/{id}")
-    public ResponseEntity<Quizz> getQuizzById(@PathVariable("id") int id)
+    public ResponseEntity<Quizz> getQuizzById(@PathVariable("id") int id) throws QuizzNotFoundException
     {
         return new ResponseEntity<>(quizzService.findQuizzById(id), HttpStatus.OK) ;
     }
@@ -77,8 +78,8 @@ public class QuizzController {
 
 
     // test ok
-    @PostMapping("/quizzes")
-    public ResponseEntity<Quizz> addNewQuizz(@RequestBody QuizzDTO quizzDTO)
+    @PostMapping("/add")
+    public ResponseEntity<Quizz> addNewQuizz(@RequestBody QuizzDTO quizzDTO) throws QuizzExistsException
     {
         return new ResponseEntity<>(quizzService.addQuizz(quizzDTO), HttpStatus.CREATED);
     }

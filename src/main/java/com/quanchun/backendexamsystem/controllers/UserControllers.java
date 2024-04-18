@@ -3,10 +3,7 @@ package com.quanchun.backendexamsystem.controllers;
 import com.quanchun.backendexamsystem.entities.RegisterQuizz;
 import com.quanchun.backendexamsystem.entities.Role;
 import com.quanchun.backendexamsystem.entities.User;
-import com.quanchun.backendexamsystem.error.QuizzNotFoundException;
-import com.quanchun.backendexamsystem.error.RegisterQuizzNotFoundException;
-import com.quanchun.backendexamsystem.error.RoleNotFoundException;
-import com.quanchun.backendexamsystem.error.UserNotFoundException;
+import com.quanchun.backendexamsystem.error.*;
 import com.quanchun.backendexamsystem.models.*;
 import com.quanchun.backendexamsystem.models.responses.ResponseRegisterQuizzDTO;
 import com.quanchun.backendexamsystem.services.RegisterQuizzService;
@@ -50,7 +47,7 @@ public class UserControllers {
 
 //    test ok
     @PostMapping("/addNewRole")
-    public ResponseEntity<String> addNewRole(@RequestBody @Valid RoleDTO newRole){
+    public ResponseEntity<String> addNewRole(@RequestBody @Valid RoleDTO newRole) throws RoleExistsException {
         Role role = roleService.addNewRole(newRole);
         String responseBody = String.format("Cannot add %s Role", newRole.getName());
         if(role!=null){
@@ -61,7 +58,7 @@ public class UserControllers {
 
 //    test ok
     @PostMapping("/addNewUser")
-    public ResponseEntity<String> addNewUser(@RequestBody @Valid UserDTO newUser) throws RoleNotFoundException {
+    public ResponseEntity<String> addNewUser(@RequestBody @Valid UserDTO newUser) throws RoleNotFoundException, UserExistsException {
         User user = userService.addNewUser(newUser);
         String responseBody = "Cannot add new User";
         if(user!=null){

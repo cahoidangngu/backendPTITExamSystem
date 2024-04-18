@@ -1,6 +1,7 @@
 package com.quanchun.backendexamsystem.controllers;
 
 import com.quanchun.backendexamsystem.entities.Question;
+import com.quanchun.backendexamsystem.error.QuestionExistsException;
 import com.quanchun.backendexamsystem.error.QuestionNotFoundException;
 import com.quanchun.backendexamsystem.error.QuizzNotFoundException;
 import com.quanchun.backendexamsystem.models.QuestionDTO;
@@ -27,7 +28,7 @@ public class QuestionController {
     }
     // test ok
     @PostMapping("/add")
-    public ResponseEntity<Question> addQuestion(@RequestBody QuestionDTO questionDTO)
+    public ResponseEntity<Question> addQuestion(@RequestBody QuestionDTO questionDTO) throws QuestionExistsException
     {
         return  new ResponseEntity<>(questionService.addQuestion(questionDTO), HttpStatus.CREATED);
     }
@@ -51,7 +52,7 @@ public class QuestionController {
     }
     // test ok
     @GetMapping("questions/{id}")
-    public Question getQuestionById(@PathVariable("id") int id)
+    public Question getQuestionById(@PathVariable("id") int id) throws QuestionNotFoundException
     {
         return questionService.findQuestionById(id);
     }
@@ -61,13 +62,7 @@ public class QuestionController {
     public ResponseEntity<Question> deleteQuestionById(@PathVariable("id") int id) throws QuestionNotFoundException {
         return new ResponseEntity<>(questionService.deleteQuestionById(id), HttpStatus.OK);
     }
-    // test ok
-    @PostMapping("/new-question")
-    public Question addNewQuestion(@RequestBody QuestionDTO questionDTO)
-    {
-        return questionService.addQuestion(questionDTO);
-    }
-    // test ok
+
     @PutMapping("/questions/{id}")
     public ResponseEntity<Question> updateQuestionById(@PathVariable("id") int id, @RequestBody QuestionDTO questionDTO) throws QuestionNotFoundException {
         return new ResponseEntity<>(questionService.updateQuestionById(id, questionDTO), HttpStatus.OK);
