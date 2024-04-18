@@ -8,6 +8,7 @@ import com.quanchun.backendexamsystem.models.*;
 import com.quanchun.backendexamsystem.models.responses.ResponseRegisterQuizzDTO;
 import com.quanchun.backendexamsystem.services.RegisterQuizzService;
 import com.quanchun.backendexamsystem.services.RoleService;
+import com.quanchun.backendexamsystem.services.StatisticsService;
 import com.quanchun.backendexamsystem.services.UserService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +29,9 @@ public class UserControllers {
 
     @Autowired
     private RegisterQuizzService registerService;
+
+    @Autowired
+    private StatisticsService statisticsService;
 
     @PostMapping("/login")
     public ResponseEntity<String> userLogin(@RequestBody @Valid UserLoginDTO userLogin) throws UserNotFoundException{
@@ -106,6 +110,11 @@ public class UserControllers {
     @PostMapping("/submit-quizz/{id}")
     public ResponseEntity<ResponseRegisterQuizzDTO> userSubmitQuizz(@PathVariable("id") int id, @RequestBody SubmitQuizzDTO submitQuizzDTO) throws RegisterQuizzNotFoundException {
         return new ResponseEntity<>(registerService.submitQuizz(id, submitQuizzDTO), HttpStatus.OK);
+    }
+
+    @GetMapping("/{userId}/statistics")
+    public ResponseEntity<List<SubmittedUserDTO>> getUserStatistic(@PathVariable("userId") int userId) throws UserNotFoundException {
+        return new ResponseEntity<>(statisticsService.getUserSubmittedResult(userId), HttpStatus.OK);
     }
 
 

@@ -19,6 +19,7 @@ import java.util.Set;
 @Entity
 @Table(name = "quizz")
 @Builder
+@ToString
 public class Quizz {
     @Column(name = "quizz_id")
     @Id

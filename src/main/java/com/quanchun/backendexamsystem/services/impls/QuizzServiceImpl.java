@@ -201,8 +201,6 @@ public class QuizzServiceImpl implements QuizzService {
         List<User> users = quizz.getRegisterQuizzes().stream()
                         .map(RegisterQuizz::getUser)
                         .collect(Collectors.toList());
-        System.out.println(users.size() + "");
-        System.out.println(users.get(users.size() - 1).toString());
         // mapper
         return UserMapper.MAPPER.toResponses(users);
     }

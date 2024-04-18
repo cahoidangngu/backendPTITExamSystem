@@ -8,7 +8,9 @@ import com.quanchun.backendexamsystem.error.UserNotFoundException;
 import com.quanchun.backendexamsystem.models.QuestionDTO;
 import com.quanchun.backendexamsystem.models.QuizzDTO;
 import com.quanchun.backendexamsystem.models.UserDTO;
+import com.quanchun.backendexamsystem.models.responses.SubmittedQuizzDetailResponse;
 import com.quanchun.backendexamsystem.services.QuizzService;
+import com.quanchun.backendexamsystem.services.StatisticsService;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +28,8 @@ import java.util.Map;
 public class QuizzController {
     @Autowired
     private QuizzService quizzService;
+    @Autowired
+    private StatisticsService statisticsService;
 
     // test ok for admin only
     @GetMapping("/quizzes")
@@ -107,5 +111,10 @@ public class QuizzController {
         return new ResponseEntity<>(quizzService.getUsersByQuizzesId(quizzId), HttpStatus.OK);
     }
 
+    // test ok
+    @GetMapping("/{quizzId}/statistics")
+    public ResponseEntity<SubmittedQuizzDetailResponse> getQuizzStatistics(@PathVariable("quizzId") int quizzId) throws QuizzNotFoundException {
+        return new ResponseEntity<>(statisticsService.getDetailResult(quizzId), HttpStatus.OK);
+    }
 
 }
