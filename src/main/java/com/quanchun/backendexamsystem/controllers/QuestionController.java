@@ -16,7 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/question")
+@RequestMapping("/api")
 public class QuestionController {
     @Autowired
     QuestionService questionService;
@@ -27,44 +27,41 @@ public class QuestionController {
         return  questionService.getAllQuestions();
     }
     // test ok
-    @PostMapping("/add")
+    @PostMapping("/questions/add")
     public ResponseEntity<Question> addQuestion(@RequestBody QuestionDTO questionDTO) throws QuestionExistsException
     {
         return  new ResponseEntity<>(questionService.addQuestion(questionDTO), HttpStatus.CREATED);
     }
 
-    @GetMapping("/quizzes/{quizzId}/questions")
-    public ResponseEntity<List<Question>> getAllQuestionsByQuizzId(@PathVariable("quizzId") int id) throws QuizzNotFoundException {
+    @GetMapping("/questions/quizzes/{quizzId}")
+    public ResponseEntity<List<Question>> getAllQuestionsByQuizzId(@PathVariable("quizzId") Integer id) throws QuizzNotFoundException {
         List<Question> questions = new ArrayList<>();
         questionService.getQuestionsByQuizzId(id).forEach(questions::add);
         return new ResponseEntity<>(questions, HttpStatus.OK);
     }
 
-    @PostMapping("/quizzes/{quizzId}/questions")
-    public ResponseEntity<Question> addQuestion2Quizz(@PathVariable("quizzId") int quizzId, @RequestBody Question question) throws QuizzNotFoundException {
-        return new ResponseEntity<>(questionService.addQuestion2Quizz(quizzId, question), HttpStatus.CREATED);
-    }
+
     // test ok
-    @GetMapping("/filter")
+    @GetMapping("questions/filter")
     public List<Question> getQuestionsByFilter(@RequestParam String category)
     {
         return questionService.getQuestionsByCategory(category);
     }
     // test ok
     @GetMapping("questions/{id}")
-    public Question getQuestionById(@PathVariable("id") int id) throws QuestionNotFoundException
+    public Question getQuestionById(@PathVariable("id") Integer id) throws QuestionNotFoundException
     {
         return questionService.findQuestionById(id);
     }
 
     // test ok
-    @DeleteMapping("/deleted/{id}")
-    public ResponseEntity<Question> deleteQuestionById(@PathVariable("id") int id) throws QuestionNotFoundException {
+    @DeleteMapping("questions/{id}/delete")
+    public ResponseEntity<Question> deleteQuestionById(@PathVariable("id") Integer id) throws QuestionNotFoundException {
         return new ResponseEntity<>(questionService.deleteQuestionById(id), HttpStatus.OK);
     }
 
     @PutMapping("/questions/{id}")
-    public ResponseEntity<Question> updateQuestionById(@PathVariable("id") int id, @RequestBody QuestionDTO questionDTO) throws QuestionNotFoundException {
+    public ResponseEntity<Question> updateQuestionById(@PathVariable("id") Integer id, @RequestBody QuestionDTO questionDTO) throws QuestionNotFoundException {
         return new ResponseEntity<>(questionService.updateQuestionById(id, questionDTO), HttpStatus.OK);
     }
 }

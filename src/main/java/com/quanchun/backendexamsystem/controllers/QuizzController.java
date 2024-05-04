@@ -1,5 +1,6 @@
 package com.quanchun.backendexamsystem.controllers;
 
+import com.quanchun.backendexamsystem.entities.Question;
 import com.quanchun.backendexamsystem.entities.Quizz;
 import com.quanchun.backendexamsystem.entities.RegisterQuizz;
 import com.quanchun.backendexamsystem.error.QuizzExistsException;
@@ -9,6 +10,7 @@ import com.quanchun.backendexamsystem.models.QuestionDTO;
 import com.quanchun.backendexamsystem.models.QuizzDTO;
 import com.quanchun.backendexamsystem.models.UserDTO;
 import com.quanchun.backendexamsystem.models.responses.SubmittedQuizzDetailResponse;
+import com.quanchun.backendexamsystem.services.QuestionService;
 import com.quanchun.backendexamsystem.services.QuizzService;
 import com.quanchun.backendexamsystem.services.StatisticsService;
 import jakarta.validation.constraints.Max;
@@ -24,8 +26,10 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/quizz")
+@RequestMapping("/api")
 public class QuizzController {
+    @Autowired
+    QuestionService questionService;
     @Autowired
     private QuizzService quizzService;
     @Autowired
@@ -46,7 +50,7 @@ public class QuizzController {
 
     // test ok
     @GetMapping("/quizzes/{id}")
-    public ResponseEntity<Quizz> getQuizzById(@PathVariable("id") int id) throws QuizzNotFoundException
+    public ResponseEntity<Quizz> getQuizzById(@PathVariable("id") Integer id) throws QuizzNotFoundException
     {
         return new ResponseEntity<>(quizzService.findQuizzById(id), HttpStatus.OK) ;
     }
@@ -82,38 +86,42 @@ public class QuizzController {
 
 
     // test ok
-    @PostMapping("/add")
+    @PostMapping("quizzes/add")
     public ResponseEntity<Quizz> addNewQuizz(@RequestBody QuizzDTO quizzDTO) throws QuizzExistsException
     {
         return new ResponseEntity<>(quizzService.addQuizz(quizzDTO), HttpStatus.CREATED);
     }
 
     // test ok
-    @PutMapping("/quizzes/{id}")
-    public ResponseEntity<Quizz> updatedQuizz(@PathVariable("id") int id,@RequestBody QuizzDTO updatedQuizz) throws QuizzNotFoundException {
+    @PutMapping("/quizzes/{id}/update")
+    public ResponseEntity<Quizz> updatedQuizz(@PathVariable("id") Integer id,@RequestBody QuizzDTO updatedQuizz) throws QuizzNotFoundException {
         return new ResponseEntity<>(quizzService.updateQuizzById(id, updatedQuizz), HttpStatus.OK);
     }
 
-    @DeleteMapping("/quizzes/{id}")
-    public ResponseEntity<Quizz> deletedQuizz(@PathVariable("id") int id) throws QuizzNotFoundException {
+    @DeleteMapping("/quizzes/{id}/delete")
+    public ResponseEntity<Quizz> deletedQuizz(@PathVariable("id") Integer id) throws QuizzNotFoundException {
         quizzService.deleteById(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
-    // maybe when create a quizz just set some basic feature
+    // the same :))
     @PostMapping("/add-question/{id}")
-    public ResponseEntity<Quizz> addQuestion2Quizz(@PathVariable("id") int id, @RequestBody List<QuestionDTO> questionDTOS) throws QuizzNotFoundException {
+    public ResponseEntity<Quizz> addQuestion2Quizz(@PathVariable("id") Integer id, @RequestBody List<QuestionDTO> questionDTOS) throws QuizzNotFoundException {
         return new ResponseEntity<>(quizzService.addQuestions(id, questionDTOS), HttpStatus.OK) ;
     }
-
+    @PostMapping("/quizzes/{quizzId}/add-question")
+    public ResponseEntity<Question> addQuestion2Quizz(@PathVariable("quizzId") Integer quizzId, @RequestBody Question question) throws QuizzNotFoundException {
+        return new ResponseEntity<>(questionService.addQuestion2Quizz(quizzId, question), HttpStatus.CREATED);
+    }
+    //
     // test ok
-    @GetMapping("/{quizzId}/users")
-    public ResponseEntity<List<UserDTO>> getUserByQuizzId(@PathVariable("quizzId") int quizzId) throws QuizzNotFoundException {
+    @GetMapping("quizzes/{quizzId}/users")
+    public ResponseEntity<List<UserDTO>> getUserByQuizzId(@PathVariable("quizzId") Integer quizzId) throws QuizzNotFoundException {
         return new ResponseEntity<>(quizzService.getUsersByQuizzesId(quizzId), HttpStatus.OK);
     }
 
     // test ok
-    @GetMapping("/{quizzId}/statistics")
-    public ResponseEntity<SubmittedQuizzDetailResponse> getQuizzStatistics(@PathVariable("quizzId") int quizzId) throws QuizzNotFoundException {
+    @GetMapping("quizzes/{quizzId}/statistics")
+    public ResponseEntity<SubmittedQuizzDetailResponse> getQuizzStatistics(@PathVariable("quizzId") Integer quizzId) throws QuizzNotFoundException {
         return new ResponseEntity<>(statisticsService.getDetailResult(quizzId), HttpStatus.OK);
     }
 

@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/user")
+@RequestMapping("/api")
 public class UserControllers {
     @Autowired
     private UserService userService;
@@ -43,14 +43,14 @@ public class UserControllers {
     }
 
 //    test ok
-    @PostMapping("/{userId}/register-quizz/{quizzId}")
+    @PostMapping("users/{userId}/register-quizz/{quizzId}")
     public ResponseEntity<ResponseRegisterQuizzDTO> register(@PathVariable("userId") Long userId, @PathVariable("quizzId") int quizzId) throws UserNotFoundException, QuizzNotFoundException {
         ResponseRegisterQuizzDTO registerQuizz = registerService.registerQuizz(userId, quizzId);
         return new ResponseEntity<>(registerQuizz, HttpStatus.OK);
     }
 
 //    test ok
-    @PostMapping("/addNewRole")
+    @PostMapping("/add-role")
     public ResponseEntity<String> addNewRole(@RequestBody @Valid RoleDTO newRole) throws RoleExistsException {
         Role role = roleService.addNewRole(newRole);
         String responseBody = String.format("Cannot add %s Role", newRole.getName());
@@ -61,7 +61,7 @@ public class UserControllers {
     }
 
 //    test ok
-    @PostMapping("/addNewUser")
+    @PostMapping("/add-user")
     public ResponseEntity<String> addNewUser(@RequestBody @Valid UserDTO newUser) throws RoleNotFoundException, UserExistsException {
         User user = userService.addNewUser(newUser);
         String responseBody = "Cannot add new User";
@@ -72,7 +72,7 @@ public class UserControllers {
     }
 
     // test ok
-    @PutMapping("/update/{id}")
+    @PutMapping("/users/{id}/update")
     public ResponseEntity<String> updateUserById(@PathVariable("id") Long userId, @RequestBody UserDTO updateUser) throws UserNotFoundException{
         User user = userService.updateUserById(userId, updateUser);
         String responseBody = "Cannot update User";
@@ -83,25 +83,25 @@ public class UserControllers {
     }
 
     // test ok
-    @GetMapping("/{id}")
+    @GetMapping("/users/{id}")
     public ResponseEntity<User> fetchUserById(@PathVariable("id") Long userId) throws UserNotFoundException {
         return new ResponseEntity<>( userService.getUserById(userId), HttpStatus.OK);
     }
 
     // test ok
-    @GetMapping("/list")
+    @GetMapping("/users")
     public ResponseEntity<List<User>> fetchAllUsers() throws UserNotFoundException{
         return new ResponseEntity<>( userService.getAllUser(), HttpStatus.OK);
     }
 
-    // test ok but we need to mapper a dto not to show too much information
-    @GetMapping("/{userId}/quizzes")
+    // test ok, but we need to map a dto not to show too much information
+    @GetMapping("/users/{userId}/quizzes")
     public ResponseEntity<List<QuizzDTO>> getQuizzes4StudentId(@PathVariable("userId") int userId) throws UserNotFoundException {
         return new ResponseEntity<>(userService.getQuizzesByUserId((long) userId), HttpStatus.OK);
     }
 
     // test ok
-    @DeleteMapping("delete/{id}")
+    @DeleteMapping("/users/{id}/delete")
     public ResponseEntity<User> deleteUserById(@PathVariable("id") Long userId) throws UserNotFoundException {
         return new ResponseEntity<>( userService.deleteUserById(userId), HttpStatus.OK);
     }
@@ -112,7 +112,7 @@ public class UserControllers {
         return new ResponseEntity<>(registerService.submitQuizz(id, submitQuizzDTO), HttpStatus.OK);
     }
 
-    @GetMapping("/{userId}/statistics")
+    @GetMapping("users/{userId}/statistics")
     public ResponseEntity<List<SubmittedUserDTO>> getUserStatistic(@PathVariable("userId") int userId) throws UserNotFoundException {
         return new ResponseEntity<>(statisticsService.getUserSubmittedResult(userId), HttpStatus.OK);
     }
