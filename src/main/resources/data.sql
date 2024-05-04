@@ -4,5 +4,5 @@ INSERT INTO `quizz` (quizz_id,host_id, title, description, difficulty, created_a
 INSERT INTO `quizzes_questions` VALUES (7,18);
 
 INSERT INTO `roles` VALUES (0,'ROLE_ADMIN'),(1,'ROLE_TEACHER'),(2,'ROLE_STUDENT');
-INSERT INTO `users` VALUES (0,'GB', '2003-12-16', 'Nguyen Tuan Tai', 1,'','123','','E21CQCN04-B','B21DCCN007'), (1,'GB', '2003-01-16', 'Nguyen Tuan Thuan', 1,'','123','','E21CQCN04-B','B21DCCN009'), (2,'HD', '2003-02-16', 'Nguyen Ngoc Trinh', 0,'','123','','E21CQCN03-B','B21DCDT007');
-INSERT INTO `user_roles` VALUES (0,0), (0,1), (1,1), (2,2);
+--INSERT INTO `users` VALUES (0,'GB', '2003-12-16', 'Nguyen Tuan Tai', 1,'','123','','E21CQCN04-B','B21DCCN007'), (1,'GB', '2003-01-16', 'Nguyen Tuan Thuan', 1,'','123','','E21CQCN04-B','B21DCCN009'), (2,'HD', '2003-02-16', 'Nguyen Ngoc Trinh', 0,'','123','','E21CQCN03-B','B21DCDT007');
+--INSERT INTO `user_roles` VALUES (0,0), (0,1), (1,1), (2,2);

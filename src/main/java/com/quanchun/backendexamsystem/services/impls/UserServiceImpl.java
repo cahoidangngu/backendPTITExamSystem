@@ -15,18 +15,27 @@ import com.quanchun.backendexamsystem.repositories.RoleRepository;
 import com.quanchun.backendexamsystem.repositories.UserRepository;
 import com.quanchun.backendexamsystem.services.RoleService;
 import com.quanchun.backendexamsystem.services.UserService;
+import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 @Service
 public class UserServiceImpl implements UserService {
-
+    public static final Integer DEFAULT_PAGE = 1;
+    public static final Integer DEFAULT_PAGE_SIZE = 10;
+    public static final Integer MAXIMUM_PAGE_SIZE = 500;
+    public static final Sort.Direction DEFAULT_DIRECTION = Sort.Direction.ASC;
     @Autowired
     private UserRepository userRepository;
     @Autowired
@@ -51,11 +60,29 @@ public class UserServiceImpl implements UserService {
         return userRepository.save(user);
     }
 
+    @PostConstruct
+    public void initDB()
+    {
+        LocalDateTime now = LocalDateTime.now();
+
+        Date date = Timestamp.valueOf(now);
+        List<User> users = IntStream.rangeClosed(100, 300)
+                .mapToObj(i -> User.builder()
+                        .username("Duong Tuan " + i)
+                        .dob(date)
+                        .gender(true)
+                        .password("password" + i)
+                        .studyClass("E21CQCN03")
+                        .username("B21DCCN" + i)
+                        .build())
+                .collect(Collectors.toList());
+        userRepository.saveAll(users);
+    }
     @Override
-    public List<User> getAllUser() throws UserNotFoundException{
+    public Page<User> getAllUser() throws UserNotFoundException{
         List<User> users = userRepository.findAll();
         if(users.isEmpty()) throw new UserNotFoundException("No users in list");
-        return users;
+        return (Page<User>) userRepository.findAll();
     }
 
     @Override
@@ -133,5 +160,25 @@ public class UserServiceImpl implements UserService {
         if(!optionalUser.isPresent()) throw new UserNotFoundException("Not found user");
         userRepository.deleteById(userId);
         return optionalUser.get();
+    }
+
+    @Override
+    public List<User> getUserWithSorting(String field, Sort.Direction direction) {
+        return userRepository.findAll(Sort.by(Sort.Direction.ASC, field));
+
+    }
+
+
+    @Override
+    public Page<User> getUserWithPagination(Integer offset, Integer page) {
+        return userRepository.findAll(PageRequest.of(offset, page));
+    }
+
+    @Override
+    public Page<User> getUserWithSortAndPagination(String field, Integer page, Integer pageSize) {
+        if(page == null) page = DEFAULT_PAGE;
+        if(pageSize == null) pageSize = DEFAULT_PAGE_SIZE;
+        if(field != null) return userRepository.findAll(PageRequest.of(page, pageSize, Sort.by(field)));
+        return userRepository.findAll(PageRequest.of(page, pageSize));
     }
 }
