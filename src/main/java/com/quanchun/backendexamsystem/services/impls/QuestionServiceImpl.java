@@ -17,6 +17,10 @@ import com.quanchun.backendexamsystem.services.QuestionService;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -214,6 +218,34 @@ public class QuestionServiceImpl implements QuestionService {
             throw new QuizzNotFoundException("Quizz with id " + quizzId + "not found");
         }
         List<Question> questions = questionRepository.findQuestionsByQuizzesId(quizzId);
+        return questions;
+    }
+
+    @Override
+    public Page<Question> getAllQuestionWithSortingAndPaginationAndFilter(String category, Integer difficulty, String field, Integer page, Integer pageSize, String order) {
+        if(page == null) page = UserServiceImpl.DEFAULT_PAGE;
+        if(pageSize == null) pageSize = UserServiceImpl.DEFAULT_PAGE_SIZE;
+        Pageable pageable;
+        if(field != null && order != null)
+        {
+            Sort.Direction direction = order.equalsIgnoreCase("desc") ? Sort.Direction.DESC : Sort.Direction.ASC;
+            Sort sort = Sort.by(direction, field);
+            pageable = PageRequest.of(page, pageSize, sort);
+        }
+        else
+        {
+            pageable = PageRequest.of(page, pageSize);
+        }
+        Page<Question> questions;
+        if (category != null && difficulty != null) {
+            questions = questionRepository.findByCategoryAndDifficulty(category, difficulty, pageable);
+        } else if (category != null) {
+            questions = questionRepository.findByCategory(category, pageable);
+        } else if (difficulty != null) {
+            questions = questionRepository.findByDifficulty(difficulty, pageable);
+        } else {
+            questions = questionRepository.findAll(pageable);
+        }
         return questions;
     }
 

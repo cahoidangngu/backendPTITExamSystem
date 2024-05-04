@@ -32,8 +32,8 @@ import java.util.stream.IntStream;
 
 @Service
 public class UserServiceImpl implements UserService {
-    public static final Integer DEFAULT_PAGE = 1;
-    public static final Integer DEFAULT_PAGE_SIZE = 10;
+    public static final Integer DEFAULT_PAGE = 0;
+    public static final Integer DEFAULT_PAGE_SIZE = 20;
     public static final Integer MAXIMUM_PAGE_SIZE = 500;
     public static final Sort.Direction DEFAULT_DIRECTION = Sort.Direction.ASC;
     @Autowired

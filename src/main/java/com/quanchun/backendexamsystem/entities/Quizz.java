@@ -33,7 +33,7 @@ public class Quizz {
     @Column(name = "description")
     private String description;
     @Column(name = "difficulty")
-    private int difficulty;
+    private Integer difficulty;
     @Column(name = "created_at")
     @NotNull
     private Date createdAt;
@@ -42,9 +42,9 @@ public class Quizz {
     @Column(name = "ended_at")
     private Date endedAt;
     @Column(name = "score")
-    private int score;
+    private Integer score;
     @Column(name = "type")
-    private int type;
+    private Integer type;
 
     @JsonManagedReference
     @OneToMany(mappedBy = "quizz",cascade = CascadeType.ALL, orphanRemoval = true)

@@ -21,15 +21,15 @@ public class Question {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "question_id")
-    private int id;
+    private Integer id;
     @Column(name = "quizz_question")
     private String questionContent;
     @Column(name = "question_difficulty")
-    private int difficulty;
+    private Integer difficulty;
     @Column(name = "question_multianswer")
-    private int multianswer;
+    private Integer multianswer;
     @Column(name = "correct_answer")
-    private int correctedAnswer;
+    private Integer correctedAnswer;
 
     @ManyToMany(
             fetch = FetchType.LAZY, cascade = {

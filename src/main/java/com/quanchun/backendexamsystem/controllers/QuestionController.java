@@ -8,6 +8,7 @@ import com.quanchun.backendexamsystem.models.QuestionDTO;
 import com.quanchun.backendexamsystem.services.QuestionService;
 import com.quanchun.backendexamsystem.services.QuizzService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -22,9 +23,15 @@ public class QuestionController {
     QuestionService questionService;
     // test ok
     @GetMapping("/questions")
-    public List<Question>  getAllQuestions()
+    public ResponseEntity<Page<Question>> getAllQuestions(@RequestParam(required = false) String field,
+                                                          @RequestParam(defaultValue = "asc", required = false) String order,
+                                                          @RequestParam(required = false) Integer page,
+                                                          @RequestParam(required = false) Integer pageSize,
+                                                          @RequestParam(required = false) String category,
+                                                          @RequestParam(required = false) Integer difficulty
+    )
     {
-        return  questionService.getAllQuestions();
+        return new ResponseEntity<>(questionService.getAllQuestionWithSortingAndPaginationAndFilter(category, difficulty, field, page, pageSize, order), HttpStatus.OK);
     }
     // test ok
     @PostMapping("/questions/add")
@@ -41,7 +48,7 @@ public class QuestionController {
     }
 
 
-    // test ok
+    // Maybe we do not need
     @GetMapping("questions/filter")
     public List<Question> getQuestionsByFilter(@RequestParam String category)
     {
