@@ -16,6 +16,7 @@ import com.quanchun.backendexamsystem.services.StatisticsService;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -37,15 +38,15 @@ public class QuizzController {
 
     // test ok for admin only
     @GetMapping("/quizzes")
-    public ResponseEntity<List<Quizz>> getAllQuizzes()
+    public ResponseEntity<Page<QuizzDTO>> getAllQuizzes(@RequestParam(required = false) Integer page,
+                                                     @RequestParam(required = false) Integer pageSize,
+                                                     @RequestParam(required = false) String field,
+                                                     @RequestParam(required = false) Integer difficulty,
+                                                     @RequestParam(required = false) String dateOrder,
+                                                     @RequestParam(required = false) String sort)
     {
-        List<Quizz> quizzes = new ArrayList<>();
-        quizzService.getAllQuizzes().forEach(quizzes::add);
-        if(quizzes.isEmpty())
-        {
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        }
-        return new ResponseEntity<>(quizzes, HttpStatus.OK);
+
+        return new ResponseEntity<>(quizzService.getQuizzesWithSortingAndPagingAndFilter(field, sort, page, pageSize, difficulty, dateOrder), HttpStatus.OK);
     }
 
     // test ok

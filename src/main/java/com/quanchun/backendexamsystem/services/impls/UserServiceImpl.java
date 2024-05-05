@@ -33,7 +33,7 @@ import java.util.stream.IntStream;
 @Service
 public class UserServiceImpl implements UserService {
     public static final Integer DEFAULT_PAGE = 0;
-    public static final Integer DEFAULT_PAGE_SIZE = 20;
+    public static final Integer DEFAULT_PAGE_SIZE = 10;
     public static final Integer MAXIMUM_PAGE_SIZE = 500;
     public static final Sort.Direction DEFAULT_DIRECTION = Sort.Direction.ASC;
     @Autowired
@@ -60,24 +60,24 @@ public class UserServiceImpl implements UserService {
         return userRepository.save(user);
     }
 
-    @PostConstruct
-    public void initDB()
-    {
-        LocalDateTime now = LocalDateTime.now();
-
-        Date date = Timestamp.valueOf(now);
-        List<User> users = IntStream.rangeClosed(100, 300)
-                .mapToObj(i -> User.builder()
-                        .username("Duong Tuan " + i)
-                        .dob(date)
-                        .gender(true)
-                        .password("password" + i)
-                        .studyClass("E21CQCN03")
-                        .username("B21DCCN" + i)
-                        .build())
-                .collect(Collectors.toList());
-        userRepository.saveAll(users);
-    }
+//    @PostConstruct
+//    public void initDB()
+//    {
+//        LocalDateTime now = LocalDateTime.now();
+//
+//        Date date = Timestamp.valueOf(now);
+//        List<User> users = IntStream.rangeClosed(100, 300)
+//                .mapToObj(i -> User.builder()
+//                        .username("Duong Tuan " + i)
+//                        .dob(date)
+//                        .gender(true)
+//                        .password("password" + i)
+//                        .studyClass("E21CQCN03")
+//                        .username("B21DCCN" + i)
+//                        .build())
+//                .collect(Collectors.toList());
+//        userRepository.saveAll(users);
+//    }
     @Override
     public Page<User> getAllUser() throws UserNotFoundException{
         List<User> users = userRepository.findAll();

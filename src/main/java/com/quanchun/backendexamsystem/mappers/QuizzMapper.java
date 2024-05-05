@@ -19,6 +19,7 @@ public interface QuizzMapper {
     })
     QuizzDTO quizz2QuizzDTO(Quizz quizz);
 
+
     @IterableMapping(qualifiedByName = "toResponse")
     List<QuizzDTO> toResponses(List<Quizz> users);
 

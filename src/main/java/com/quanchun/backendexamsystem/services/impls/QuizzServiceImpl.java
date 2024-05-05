@@ -6,6 +6,7 @@ import com.quanchun.backendexamsystem.entities.RegisterQuizz;
 import com.quanchun.backendexamsystem.entities.User;
 import com.quanchun.backendexamsystem.error.QuizzNotFoundException;
 import com.quanchun.backendexamsystem.error.UserNotFoundException;
+import com.quanchun.backendexamsystem.mappers.QuizzMapper;
 import com.quanchun.backendexamsystem.mappers.UserMapper;
 import com.quanchun.backendexamsystem.models.QuestionDTO;
 import com.quanchun.backendexamsystem.models.QuizzDTO;
@@ -13,16 +14,16 @@ import com.quanchun.backendexamsystem.models.UserDTO;
 import com.quanchun.backendexamsystem.repositories.QuizzRepository;
 import com.quanchun.backendexamsystem.services.QuizzService;
 import com.quanchun.backendexamsystem.services.UserService;
+import jakarta.annotation.PostConstruct;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import java.time.LocalDateTime;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -34,6 +35,38 @@ public class QuizzServiceImpl implements QuizzService {
 
     @Autowired
     private UserService userService;
+
+//    @PostConstruct
+//    public void initDB()
+//    {
+//        List<Quizz> quizzes = new ArrayList<>();
+//        Random random = new Random();
+//
+//        for (int i = 0; i < 200; i++) {
+//            Quizz quizz = new Quizz();
+//            quizz.setId(i + 1); // Assuming id starts from 1
+//            quizz.setCreatedAt(randomDate());
+//            quizz.setStartedAt(randomDate());
+//            quizz.setEndedAt(randomDate());
+//            quizz.setTitle("Quizz " + (i + 1));
+//            quizz.setDescription("Description for Quizz " + (i + 1));
+//            quizz.setDifficulty(random.nextInt(10) + 1); // Random difficulty from 1 to 10
+//            quizz.setScore(random.nextInt(100)); // Random score
+//            quizz.setType(random.nextInt(2)); // Random type
+//            quizz.setHostId(random.nextInt(1000) + 1); // Assuming hostId starts from 1 and goes up to 1000
+//
+//            quizzes.add(quizz);
+//        }
+//
+//        quizzRepository.saveAll(quizzes);
+//    }
+//    private java.sql.Date randomDate()
+//    {
+//        long millisInYear = 365L * 24 * 60 * 60 * 1000;
+//        long currentTimeMillis = System.currentTimeMillis();
+//        long randomMillis = (long) (Math.random() * millisInYear);
+//        return new java.sql.Date(currentTimeMillis - randomMillis);
+//    }
     @Override
     @Transactional
     public Quizz addQuizz(QuizzDTO theQuizz) {
@@ -203,5 +236,67 @@ public class QuizzServiceImpl implements QuizzService {
                         .collect(Collectors.toList());
         // mapper
         return UserMapper.MAPPER.toResponses(users);
+    }
+
+    @Override
+    public Page<QuizzDTO> getQuizzesWithSortingAndPagingAndFilter(String field, String order, Integer page, Integer pageSize, Integer difficulty, String preDateOption) {
+        if(page == null) page = UserServiceImpl.DEFAULT_PAGE;
+        if(pageSize == null) pageSize = UserServiceImpl.DEFAULT_PAGE_SIZE;
+        Pageable pageable;
+        if(field != null && order != null)
+        {
+            Sort.Direction direction = order.equalsIgnoreCase("desc") ? Sort.Direction.DESC : Sort.Direction.ASC;
+            Sort sort = Sort.by(direction, field);
+            pageable = PageRequest.of(page, pageSize, sort);
+        }
+        else
+        {
+            pageable = PageRequest.of(page, pageSize);
+        }
+        Page<QuizzDTO> quizzes;
+        Date startTime;
+        List<QuizzDTO> dtos = new ArrayList<>();
+        if(difficulty != null && preDateOption != null)
+        {
+            startTime = calculateStartTime(preDateOption);
+            quizzes = quizzRepository.findByCreatedAtAfterAndDifficulty(startTime, difficulty, pageable)
+                    .map(quizz -> QuizzMapper.MAPPER.quizz2QuizzDTO(quizz));
+        }
+        else if(difficulty != null)
+        {
+            quizzes = quizzRepository.findQuizzesByDifficulty(difficulty, pageable)
+                    .map(quizz -> QuizzMapper.MAPPER.quizz2QuizzDTO(quizz));
+
+        }
+        else if(preDateOption != null)
+        {
+             startTime = calculateStartTime(preDateOption);
+             quizzes = quizzRepository.findByCreatedAtAfter(startTime, pageable)
+                     .map(quizz -> QuizzMapper.MAPPER.quizz2QuizzDTO(quizz));
+        }
+        else quizzes = quizzRepository.findAll(pageable).map(quizz -> QuizzMapper.MAPPER.quizz2QuizzDTO(quizz));
+        return quizzes;
+    }
+    private Date calculateStartTime(String period) {
+        Date now = new Date();
+        long millisecondsInDay = 24 * 60 * 60 * 1000L; // Milliseconds in a day
+        long startTimeMillis;
+
+        switch (period) {
+            case "day":
+                startTimeMillis = now.getTime() - millisecondsInDay;
+                break;
+            case "week":
+                startTimeMillis = now.getTime() - 7 * millisecondsInDay;
+                break;
+            case "month":
+                startTimeMillis = now.getTime() - 30 * millisecondsInDay; // Approximation for a month
+                break;
+            default:
+                startTimeMillis = now.getTime() - millisecondsInDay;
+                break;
+        }
+
+        return new Date(startTimeMillis);
     }
 }

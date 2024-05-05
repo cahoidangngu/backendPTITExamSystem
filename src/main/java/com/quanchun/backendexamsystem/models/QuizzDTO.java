@@ -23,12 +23,12 @@ public class QuizzDTO {
     @NotBlank
     private String description;
 
-    private int difficulty;
+    private Integer difficulty;
     @NotBlank
     private Date createdAt;
     private Date startedAt;
     private Date endedAt;
-    private int score;
-    private int type;
+    private Integer score;
+    private Integer type;
     private List<Question> questions;
 }

@@ -10,10 +10,12 @@ import com.quanchun.backendexamsystem.mappers.UserMapper;
 import com.quanchun.backendexamsystem.models.QuestionAnswerDTO;
 import com.quanchun.backendexamsystem.models.QuestionDTO;
 import com.quanchun.backendexamsystem.models.UserDTO;
+import com.quanchun.backendexamsystem.repositories.QuestionAnswerRepository;
 import com.quanchun.backendexamsystem.repositories.QuestionRepository;
 import com.quanchun.backendexamsystem.repositories.QuizzRepository;
 import com.quanchun.backendexamsystem.repositories.UserRepository;
 import com.quanchun.backendexamsystem.services.QuestionService;
+import jakarta.annotation.PostConstruct;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,9 +28,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 /*
 *  Nên thêm category cho ngân hàng câu hỏi rồi cho filter
@@ -40,7 +40,41 @@ public class QuestionServiceImpl implements QuestionService {
     @Autowired
     private QuizzRepository quizzRepository;
     @Autowired
+    private QuestionAnswerRepository questionAnswerRepository;
+    @Autowired
     EntityManager entityManager;
+    /* Gen data for test*/
+//    @PostConstruct
+//    public void initDB()
+//    {
+//        Random random = new Random();
+//
+//        for (int i = 0; i < 200; i++) {
+//            Question question = new Question();
+//            question.setId(i + 1); // Assuming id starts from 1
+//            question.setQuestionContent("Question " + (i + 1));
+//            question.setMultianswer(4);
+//            question.setDifficulty(random.nextInt(10) + 1); // Random difficulty from 1 to 10
+//            question.setCorrectedAnswer(random.nextInt(4) + 1); // Random correct answer from 1 to 4
+//            question.setCategory("Category " + (random.nextInt(10) + 1)); // Random category
+//            question.setQuestionAnswers(generateAnswers());
+//
+//            questionRepository.save(question);
+//        }
+//    }
+//    private List<QuestionAnswer> generateAnswers() {
+//        List<QuestionAnswer> answers = new ArrayList<>();
+//        Random random = new Random();
+//
+//        for (int i = 0; i < 4; i++) {
+//            QuestionAnswer answer = new QuestionAnswer();
+//            answer.setQaId(i + 1); // Assuming id starts from 1
+//            answer.setAnswer("Answer " + (i + 1));
+//            answers.add(answer);
+//        }
+//        questionAnswerRepository.saveAll(answers);
+//        return answers;
+//    }
     @Override
     @Transactional
     public Question addQuestion(QuestionDTO theQuestion) {
