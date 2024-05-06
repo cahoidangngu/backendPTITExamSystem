@@ -15,8 +15,8 @@ import java.util.Objects;
 @Embeddable
 public class ParticipantAnswerId implements Serializable {
 
-    @Column(name = "register_question_id")
-    private int registerQuizzId;
+    @Column(name = "participant_attempt_id")
+    private int participantAttemptId;
     @Column(name = "question_bank_id")
     private int questionId;
 
@@ -27,13 +27,13 @@ public class ParticipantAnswerId implements Serializable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         ParticipantAnswerId participantAnswerId = (ParticipantAnswerId) o;
-        return (registerQuizzId == (((ParticipantAnswerId) o).getRegisterQuizzId())) &&
+        return (participantAttemptId == (((ParticipantAnswerId) o).getParticipantAttemptId())) &&
                 (questionId == ((ParticipantAnswerId) o).getQuestionId());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(registerQuizzId, questionId);
+        return Objects.hash(participantAttemptId, questionId);
     }
 
 }

@@ -1,17 +1,21 @@
 package com.quanchun.backendexamsystem.services.impls;
 
 import com.quanchun.backendexamsystem.entities.*;
+import com.quanchun.backendexamsystem.error.ParticipantAttemptNotFoundException;
 import com.quanchun.backendexamsystem.error.QuizzNotFoundException;
 import com.quanchun.backendexamsystem.error.RegisterQuizzNotFoundException;
 import com.quanchun.backendexamsystem.error.UserNotFoundException;
 import com.quanchun.backendexamsystem.models.QuestionAnswerDTO;
+import com.quanchun.backendexamsystem.models.requests.ParticipantAttemptRequestDTO;
+import com.quanchun.backendexamsystem.models.requests.RegisterQuizzRequest;
+import com.quanchun.backendexamsystem.models.responses.ParticipantAttemptResponseDTO;
 import com.quanchun.backendexamsystem.models.responses.ResponseAnswerQuestionDTO;
 import com.quanchun.backendexamsystem.models.responses.ResponseRegisterQuizzDTO;
-import com.quanchun.backendexamsystem.models.SubmitQuizzDTO;
 import com.quanchun.backendexamsystem.models.UserAnswerDTO;
 import com.quanchun.backendexamsystem.repositories.QuizzRepository;
 import com.quanchun.backendexamsystem.repositories.RegisterQuizzRepository;
 import com.quanchun.backendexamsystem.repositories.UserRepository;
+import com.quanchun.backendexamsystem.services.ParticipantAttemptService;
 import com.quanchun.backendexamsystem.services.QuestionService;
 import com.quanchun.backendexamsystem.services.RegisterQuizzService;
 import lombok.extern.slf4j.Slf4j;
@@ -23,7 +27,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 @Service
 @Slf4j
@@ -38,40 +42,47 @@ public class RegisterQuizzServiceImpl implements RegisterQuizzService {
     @Autowired
     private QuestionService questionService;
 
+    @Autowired
+    private ParticipantAttemptService participantAttemptService;
+
 
     private Logger logger = LoggerFactory.getLogger(RegisterQuizzService.class);
 
-    private int scoreCaculator(RegisterQuizz registerQuizz){
-        AtomicInteger numberRightAnswer = new AtomicInteger(registerQuizz.getScore());
-        registerQuizz.getParticipantAnswerList().forEach(participantAnswer -> {
+    private double scoreCaculator(ParticipantAttempt participantAttempt) {
+        AtomicReference<Double> numberRightAnswer = new AtomicReference<>(participantAttempt.getScore());
+        participantAttempt.getParticipantAnswerList().forEach(participantAnswer -> {
             int correctAnswer = questionService.findQuestionById(participantAnswer.getQuestionId()).getCorrectedAnswer();
-            if(correctAnswer == participantAnswer.getUserAnswer()){
-                numberRightAnswer.set(numberRightAnswer.get() + 1);
+            if (correctAnswer == participantAnswer.getUserAnswer()) {
+                numberRightAnswer.set(numberRightAnswer.get() + 1f);
             }
         });
-        double numberAnswer = registerQuizz.getQuizz().getQuestions().size();
-        return (int)((10f/numberAnswer)* (double)numberRightAnswer.get());
+        double numberAnswer = participantAttempt.getRegisterQuiz().getQuizz().getQuestions().size();
+        return ((10f / numberAnswer) * (double) numberRightAnswer.get());
     }
 
-    private ResponseRegisterQuizzDTO RegisterQuizz2ResponseDTO(RegisterQuizz registerQuizz) {
-        ResponseRegisterQuizzDTO registerQuizzDTO = ResponseRegisterQuizzDTO.builder()
+    private ParticipantAttemptResponseDTO mapParticipantAttemptToResponseDTO(ParticipantAttempt participantAttempt) {
+        RegisterQuizz registerQuizz = participantAttempt.getRegisterQuiz();
+        ParticipantAttemptResponseDTO participantAttemptResponseDTO = ParticipantAttemptResponseDTO.builder()
+                .participantAttemptId(participantAttempt.getParticipantAttemptId())
                 .userFullName(registerQuizz.getUser().getFullName())
-                .quizzTitle(registerQuizz.getQuizz().getTitle())
-                .startedTime(registerQuizz.getQuizz().getStartedAt())
-                .endTime(registerQuizz.getQuizz().getEndedAt())
                 .studyClass(registerQuizz.getUser().getStudyClass())
+                .quizTitle(registerQuizz.getQuizz().getTitle())
+                .quizDifficulty(registerQuizz.getQuizz().getDifficulty())
+                .beginTime(registerQuizz.getBeginTime()).endTime(registerQuizz.getEndTime())
+
+                .status(registerQuizz.getStatus()).score(participantAttempt.getScore())
                 .build();
-        if (registerQuizz.getParticipantAnswerList() == null) return registerQuizzDTO;
-                registerQuizzDTO.setBeginTime(registerQuizz.getBeginTime());
-                registerQuizzDTO.setFinishedTime(registerQuizz.getFinishedTime());
-                registerQuizzDTO.setScore(registerQuizz.getScore());
-        registerQuizz.getParticipantAnswerList().forEach(participantAnswer -> {
+        if (participantAttempt.getParticipantAnswerList() == null) return participantAttemptResponseDTO;
+        participantAttemptResponseDTO.setStartedTime(participantAttempt.getStartTime());
+        participantAttemptResponseDTO.setFinishedTime(participantAttempt.getFinishTime());
+        participantAttemptResponseDTO.setScore(participantAttempt.getScore());
+        participantAttempt.getParticipantAnswerList().forEach(participantAnswer -> {
             Question question = questionService.findQuestionById(participantAnswer.getQuestionId());
             List<QuestionAnswerDTO> questionAnswersDTO = new ArrayList<>();
             question.getQuestionAnswers().forEach(questionAnswer -> questionAnswersDTO.add(
                     QuestionAnswerDTO.builder().answer(questionAnswer.getAnswer()).build()
             ));
-            registerQuizzDTO.addQuizzQuestion(ResponseAnswerQuestionDTO.builder()
+            participantAttemptResponseDTO.addQuizQuestion(ResponseAnswerQuestionDTO.builder()
                     .questionContent(question.getQuestionContent())
                     .difficulty(question.getDifficulty())
                     .multianswer(question.getMultianswer())
@@ -81,39 +92,43 @@ public class RegisterQuizzServiceImpl implements RegisterQuizzService {
                     .questionAnswers(questionAnswersDTO)
                     .build());
         });
-        return registerQuizzDTO;
+        return participantAttemptResponseDTO;
     }
 
 
     @Override
-    public ResponseRegisterQuizzDTO registerQuizz(Long userId, int quizzId) throws QuizzNotFoundException, UserNotFoundException {
+    public ResponseRegisterQuizzDTO registerQuizz(int quizzId, RegisterQuizzRequest registerQuizzRequest) throws QuizzNotFoundException {
         Quizz quizz = quizzRepository.findById(quizzId)
                 .orElseThrow(() -> new QuizzNotFoundException("Quizz with id " + quizzId + " not found!"));
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException("User with id " + userId + " not found!"));
 
-        // Co the kiem tra xem co phai role user ko thi moi add
-//        quizz.addUser(user);
-//        user.addQuizz(quizz);
-        RegisterQuizz registerQuizz = RegisterQuizz.builder()
-                .user(user)
-                .quizz(quizz)
-                .startedTime(quizz.getStartedAt())
-                .endTime(quizz.getEndedAt())
-                .score(0)
-                .status(0)
-                .build();
-        quizz.addRegisterQuizz(registerQuizz);
-        user.addRegisterQuizz(registerQuizz);
-        registerQuizzRepository.save(registerQuizz);
-        return RegisterQuizz2ResponseDTO(registerQuizz);
+        int numberRegisterQuizz = 0;
+
+        for (Long userId : registerQuizzRequest.getListUserId()) {
+            try {
+                User user = userRepository.findById(userId)
+                        .orElseThrow(() -> new UserNotFoundException("User with id " + userId + " not found!"));
+
+                RegisterQuizz registerQuizz = RegisterQuizz.builder()
+                        .user(user)
+                        .quizz(quizz)
+                        .beginTime(quizz.getStartedAt())
+                        .endTime(quizz.getEndedAt())
+                        .status(0)
+                        .build();
+                registerQuizzRepository.save(registerQuizz);
+                numberRegisterQuizz++;
+            } catch (UserNotFoundException ex) {
+                // Logger
+                continue;
+            }
+        }
+        return new ResponseRegisterQuizzDTO(numberRegisterQuizz);
     }
 
     @Override
     public RegisterQuizz findByRegisterId(int id) throws RegisterQuizzNotFoundException {
         Optional<RegisterQuizz> optional = registerQuizzRepository.findById(id);
-        if(optional.isEmpty())
-        {
+        if (optional.isEmpty()) {
             throw new RegisterQuizzNotFoundException("Not found!");
         }
         RegisterQuizz registerQuizz = optional.get();
@@ -153,28 +168,42 @@ public class RegisterQuizzServiceImpl implements RegisterQuizzService {
     *  + update lại registerquizz do ban dau score = 0
     *
     * */
+
+
     @Override
-    public ResponseRegisterQuizzDTO submitQuizz(int id, SubmitQuizzDTO submitQuizzDTO) throws RegisterQuizzNotFoundException {
-        RegisterQuizz registerQuizz = findByRegisterId(id);
+    public ParticipantAttemptResponseDTO createParticipantAttempt(int registerQuizzId) throws RegisterQuizzNotFoundException {
+        RegisterQuizz registerQuizz = registerQuizzRepository.findById(registerQuizzId).orElseThrow(() -> new RegisterQuizzNotFoundException("Not found register quizz with id: " + registerQuizzId));
+        registerQuizz.setStatus(1);
+
+        ParticipantAttempt participantAttempt = participantAttemptService.ceateParticipantAttempt(ParticipantAttempt.builder().registerQuiz(registerQuizz).build());
+
+        registerQuizzRepository.save(registerQuizz);
+        return mapParticipantAttemptToResponseDTO(participantAttempt);
+    }
+
+    @Override
+    public ParticipantAttemptResponseDTO submitParticipantAttempt(int participantAttemptId, ParticipantAttemptRequestDTO participantAttemptRequestDTO) throws ParticipantAttemptNotFoundException {
+        ParticipantAttempt participantAttempt = participantAttemptService.getParticipantAttemptById(participantAttemptId);
         /*
-        * BeginTime front lấy khi user bấm làm bài
-        * FinishedTime front lấy khi user bấm submit
-        * */
-        registerQuizz.setBeginTime(submitQuizzDTO.getBeginTime());
-        registerQuizz.setFinishedTime(submitQuizzDTO.getFinishTime());
-        logger.info(submitQuizzDTO.getUserAnswerDTOList().toString());
-        for(UserAnswerDTO userAnswerDTO : submitQuizzDTO.getUserAnswerDTOList()){
+         * BeginTime front lấy khi user bấm làm bài
+         * FinishedTime front lấy khi user bấm submit
+         * */
+        participantAttempt.setStartTime(participantAttemptRequestDTO.getStartTime());
+        participantAttempt.setFinishTime(participantAttemptRequestDTO.getFinishTime());
+
+        for (UserAnswerDTO userAnswerDTO : participantAttemptRequestDTO.getUserAnswerDTOList()) {
             Question question = questionService.findQuestionById(userAnswerDTO.getQuestionId());
             if (question == null) continue;
             ParticipantAnswer participantAnswer = ParticipantAnswer.builder()
-                    .registerQuizzId(id)
+                    .participantAttemptId(participantAttempt.getParticipantAttemptId())
                     .questionId(question.getId())
                     .userAnswer(userAnswerDTO.getUserAnswer())
                     .build();
-            registerQuizz.addParticipantAnswer(participantAnswer);
+            participantAttempt.addParticipantAnswer(participantAnswer);
         }
-        registerQuizz.setScore(scoreCaculator(registerQuizz));
-        return RegisterQuizz2ResponseDTO(registerQuizzRepository.save(registerQuizz));
+        participantAttempt.setScore(scoreCaculator(participantAttempt));
+        participantAttemptService.updateParticipantAttemptById(participantAttemptId, participantAttempt);
+        return mapParticipantAttemptToResponseDTO(participantAttempt);
     }
 
 

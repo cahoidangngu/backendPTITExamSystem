@@ -16,24 +16,5 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 public class ResponseRegisterQuizzDTO {
-    @NotNull
-    @NotBlank
-    private String quizzTitle;
-    private Date startedTime;
-    private Date finishedTime;
-    private Date endTime;
-    private Date beginTime;
-
-    @NotNull
-    @NotBlank
-    private String userFullName;
-    private String studyClass;
-    private int status;
-    private int score;
-    private List<ResponseAnswerQuestionDTO> quizzQuestions;
-
-    public void addQuizzQuestion(ResponseAnswerQuestionDTO responseAnswerQuestionDTO){
-        if(quizzQuestions == null) quizzQuestions = new ArrayList<>();
-        quizzQuestions.add(responseAnswerQuestionDTO);
-    }
+   private int numberRegisterQuizz;
 }

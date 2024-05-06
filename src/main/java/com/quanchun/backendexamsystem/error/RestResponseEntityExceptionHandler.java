@@ -11,6 +11,14 @@ import org.springframework.web.server.handler.ResponseStatusExceptionHandler;
 
 @RestControllerAdvice
 public class RestResponseEntityExceptionHandler extends ResponseStatusExceptionHandler {
+
+    @ExceptionHandler(ParticipantAttemptNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ResponseEntity<ErrorMessage> participantAttemptNotFoundException(ParticipantAttemptNotFoundException exception, WebRequest request){
+        ErrorMessage message = new ErrorMessage(HttpStatus.NOT_FOUND, exception.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(message);
+    }
+
     @ExceptionHandler(UserNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ResponseEntity<ErrorMessage> userNotFoundException(UserNotFoundException exception, WebRequest request){

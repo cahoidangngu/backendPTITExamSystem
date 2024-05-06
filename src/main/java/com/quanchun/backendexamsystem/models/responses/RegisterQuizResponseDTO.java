@@ -1,0 +1,12 @@
+package com.quanchun.backendexamsystem.models.responses;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+public class RegisterQuizResponseDTO {
+    private int numberSuccessRegisterQuiz;
+}

@@ -5,6 +5,9 @@ import com.quanchun.backendexamsystem.entities.Role;
 import com.quanchun.backendexamsystem.entities.User;
 import com.quanchun.backendexamsystem.error.*;
 import com.quanchun.backendexamsystem.models.*;
+import com.quanchun.backendexamsystem.models.requests.ParticipantAttemptRequestDTO;
+import com.quanchun.backendexamsystem.models.requests.RegisterQuizzRequest;
+import com.quanchun.backendexamsystem.models.responses.ParticipantAttemptResponseDTO;
 import com.quanchun.backendexamsystem.models.responses.ResponseRegisterQuizzDTO;
 import com.quanchun.backendexamsystem.services.RegisterQuizzService;
 import com.quanchun.backendexamsystem.services.RoleService;
@@ -43,9 +46,9 @@ public class UserControllers {
     }
 
 //    test ok
-    @PostMapping("users/{userId}/register-quizz/{quizzId}")
-    public ResponseEntity<ResponseRegisterQuizzDTO> register(@PathVariable("userId") Long userId, @PathVariable("quizzId") int quizzId) throws UserNotFoundException, QuizzNotFoundException {
-        ResponseRegisterQuizzDTO registerQuizz = registerService.registerQuizz(userId, quizzId);
+    @PostMapping("users/register-quizz/{quizzId}")
+    public ResponseEntity<ResponseRegisterQuizzDTO> register(@PathVariable("quizzId") int quizzId, @RequestBody RegisterQuizzRequest registerQuizzRequest) throws UserNotFoundException, QuizzNotFoundException {
+        ResponseRegisterQuizzDTO registerQuizz = registerService.registerQuizz(quizzId, registerQuizzRequest);
         return new ResponseEntity<>(registerQuizz, HttpStatus.OK);
     }
 
@@ -106,10 +109,16 @@ public class UserControllers {
         return new ResponseEntity<>( userService.deleteUserById(userId), HttpStatus.OK);
     }
 
+
+    @PostMapping("/doing-quizz/{registerQuizzId}")
+    public ResponseEntity<ParticipantAttemptResponseDTO> userStartQuizz(@PathVariable("id") int registerQuizzId) throws RegisterQuizzNotFoundException {
+        return new ResponseEntity<>(registerService.createParticipantAttempt(registerQuizzId), HttpStatus.OK);
+    }
+
     //test ok
-    @PostMapping("/submit-quizz/{id}")
-    public ResponseEntity<ResponseRegisterQuizzDTO> userSubmitQuizz(@PathVariable("id") int id, @RequestBody SubmitQuizzDTO submitQuizzDTO) throws RegisterQuizzNotFoundException {
-        return new ResponseEntity<>(registerService.submitQuizz(id, submitQuizzDTO), HttpStatus.OK);
+    @PostMapping("/submit-quizz/{participantAttemptId}")
+    public ResponseEntity<ParticipantAttemptResponseDTO> userSubmitQuizz(@PathVariable("participantAttemptId") int participantAttemptId, @RequestBody ParticipantAttemptRequestDTO participantAttemptRequestDTO) throws  ParticipantAttemptNotFoundException {
+        return new ResponseEntity<>(registerService.submitParticipantAttempt(participantAttemptId, participantAttemptRequestDTO), HttpStatus.OK);
     }
 
     @GetMapping("users/{userId}/statistics")
