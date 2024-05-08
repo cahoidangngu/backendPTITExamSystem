@@ -36,37 +36,37 @@ public class QuizzServiceImpl implements QuizzService {
     @Autowired
     private UserService userService;
 
-//    @PostConstruct
-//    public void initDB()
-//    {
-//        List<Quizz> quizzes = new ArrayList<>();
-//        Random random = new Random();
-//
-//        for (int i = 0; i < 200; i++) {
-//            Quizz quizz = new Quizz();
-//            quizz.setId(i + 1); // Assuming id starts from 1
-//            quizz.setCreatedAt(randomDate());
-//            quizz.setStartedAt(randomDate());
-//            quizz.setEndedAt(randomDate());
-//            quizz.setTitle("Quizz " + (i + 1));
-//            quizz.setDescription("Description for Quizz " + (i + 1));
-//            quizz.setDifficulty(random.nextInt(10) + 1); // Random difficulty from 1 to 10
-//            quizz.setScore(random.nextInt(100)); // Random score
-//            quizz.setType(random.nextInt(2)); // Random type
-//            quizz.setHostId(random.nextInt(1000) + 1); // Assuming hostId starts from 1 and goes up to 1000
-//
-//            quizzes.add(quizz);
-//        }
-//
-//        quizzRepository.saveAll(quizzes);
-//    }
-//    private java.sql.Date randomDate()
-//    {
-//        long millisInYear = 365L * 24 * 60 * 60 * 1000;
-//        long currentTimeMillis = System.currentTimeMillis();
-//        long randomMillis = (long) (Math.random() * millisInYear);
-//        return new java.sql.Date(currentTimeMillis - randomMillis);
-//    }
+    @PostConstruct
+    public void initDB()
+    {
+        List<Quizz> quizzes = new ArrayList<>();
+        Random random = new Random();
+
+        for (int i = 0; i < 200; i++) {
+            Quizz quizz = new Quizz();
+            quizz.setId(i + 1); // Assuming id starts from 1
+            quizz.setCreatedAt(randomDate());
+            quizz.setStartedAt(randomDate());
+            quizz.setEndedAt(randomDate());
+            quizz.setTitle("Quizz " + (i + 1));
+            quizz.setDescription("Description for Quizz " + (i + 1));
+            quizz.setDifficulty(random.nextInt(10) + 1); // Random difficulty from 1 to 10
+            quizz.setScore(random.nextInt(100)); // Random score
+            quizz.setType(random.nextInt(2)); // Random type
+            quizz.setHostId(random.nextInt(1000) + 1); // Assuming hostId starts from 1 and goes up to 1000
+
+            quizzes.add(quizz);
+        }
+
+        quizzRepository.saveAll(quizzes);
+    }
+    private java.sql.Date randomDate()
+    {
+        long millisInYear = 365L * 24 * 60 * 60 * 1000;
+        long currentTimeMillis = System.currentTimeMillis();
+        long randomMillis = (long) (Math.random() * millisInYear);
+        return new java.sql.Date(currentTimeMillis - randomMillis);
+    }
     @Override
     @Transactional
     public Quizz addQuizz(QuizzDTO theQuizz) {

@@ -44,37 +44,37 @@ public class QuestionServiceImpl implements QuestionService {
     @Autowired
     EntityManager entityManager;
     /* Gen data for test*/
-//    @PostConstruct
-//    public void initDB()
-//    {
-//        Random random = new Random();
-//
-//        for (int i = 0; i < 200; i++) {
-//            Question question = new Question();
-//            question.setId(i + 1); // Assuming id starts from 1
-//            question.setQuestionContent("Question " + (i + 1));
-//            question.setMultianswer(4);
-//            question.setDifficulty(random.nextInt(10) + 1); // Random difficulty from 1 to 10
-//            question.setCorrectedAnswer(random.nextInt(4) + 1); // Random correct answer from 1 to 4
-//            question.setCategory("Category " + (random.nextInt(10) + 1)); // Random category
-//            question.setQuestionAnswers(generateAnswers());
-//
-//            questionRepository.save(question);
-//        }
-//    }
-//    private List<QuestionAnswer> generateAnswers() {
-//        List<QuestionAnswer> answers = new ArrayList<>();
-//        Random random = new Random();
-//
-//        for (int i = 0; i < 4; i++) {
-//            QuestionAnswer answer = new QuestionAnswer();
-//            answer.setQaId(i + 1); // Assuming id starts from 1
-//            answer.setAnswer("Answer " + (i + 1));
-//            answers.add(answer);
-//        }
-//        questionAnswerRepository.saveAll(answers);
-//        return answers;
-//    }
+    @PostConstruct
+    public void initDB()
+    {
+        Random random = new Random();
+
+        for (int i = 0; i < 200; i++) {
+            Question question = new Question();
+            question.setId(i + 1); // Assuming id starts from 1
+            question.setQuestionContent("Question " + (i + 1));
+            question.setMultianswer(4);
+            question.setDifficulty(random.nextInt(10) + 1); // Random difficulty from 1 to 10
+            question.setCorrectedAnswer(random.nextInt(4) + 1); // Random correct answer from 1 to 4
+            question.setCategory("Category " + (random.nextInt(10) + 1)); // Random category
+            question.setQuestionAnswers(generateAnswers());
+
+            questionRepository.save(question);
+        }
+    }
+    private List<QuestionAnswer> generateAnswers() {
+        List<QuestionAnswer> answers = new ArrayList<>();
+        Random random = new Random();
+
+        for (int i = 0; i < 4; i++) {
+            QuestionAnswer answer = new QuestionAnswer();
+            answer.setQaId(i + 1); // Assuming id starts from 1
+            answer.setAnswer("Answer " + (i + 1));
+            answers.add(answer);
+        }
+        questionAnswerRepository.saveAll(answers);
+        return answers;
+    }
     @Override
     @Transactional
     public Question addQuestion(QuestionDTO theQuestion) {
