@@ -2,13 +2,12 @@ package com.quanchun.backendexamsystem.controllers;
 
 import com.quanchun.backendexamsystem.entities.Question;
 import com.quanchun.backendexamsystem.entities.Quizz;
-import com.quanchun.backendexamsystem.entities.RegisterQuizz;
 import com.quanchun.backendexamsystem.error.QuizzExistsException;
 import com.quanchun.backendexamsystem.error.QuizzNotFoundException;
-import com.quanchun.backendexamsystem.error.UserNotFoundException;
 import com.quanchun.backendexamsystem.models.QuestionDTO;
 import com.quanchun.backendexamsystem.models.QuizzDTO;
 import com.quanchun.backendexamsystem.models.UserDTO;
+import com.quanchun.backendexamsystem.models.responses.ResponseQuizDTO;
 import com.quanchun.backendexamsystem.models.responses.SubmittedQuizzDetailResponse;
 import com.quanchun.backendexamsystem.services.QuestionService;
 import com.quanchun.backendexamsystem.services.QuizzService;
@@ -16,7 +15,6 @@ import com.quanchun.backendexamsystem.services.StatisticsService;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -38,15 +36,16 @@ public class QuizzController {
 
     // test ok for admin only
     @GetMapping("/quizzes")
-    public ResponseEntity<Page<QuizzDTO>> getAllQuizzes(@RequestParam(required = false) Integer page,
-                                                     @RequestParam(required = false) Integer pageSize,
-                                                     @RequestParam(required = false) String field,
-                                                     @RequestParam(required = false) Integer difficulty,
-                                                     @RequestParam(required = false) String dateOrder,
-                                                     @RequestParam(required = false) String sort)
+    public ResponseEntity<List<ResponseQuizDTO>> getAllQuizzes(@RequestParam(required = false) Integer page,
+                                                               @RequestParam(required = false) Integer pageSize,
+                                                               @RequestParam(required = false) String field,
+                                                               @RequestParam(required = false) Integer difficulty,
+                                                               @RequestParam(required = false) String dateOrder,
+                                                               @RequestParam(required = false) String sort)
     {
 
-        return new ResponseEntity<>(quizzService.getQuizzesWithSortingAndPagingAndFilter(field, sort, page, pageSize, difficulty, dateOrder), HttpStatus.OK);
+//        return new ResponseEntity<>(quizzService.getQuizzesWithSortingAndPagingAndFilter(field, sort, page, pageSize, difficulty, dateOrder), HttpStatus.OK);
+        return new ResponseEntity<>( quizzService.getAllQuizzes(), HttpStatus.OK);
     }
 
     // test ok
@@ -99,10 +98,10 @@ public class QuizzController {
         return new ResponseEntity<>(quizzService.updateQuizzById(id, updatedQuizz), HttpStatus.OK);
     }
 
-    @DeleteMapping("/quizzes/{id}/delete")
-    public ResponseEntity<Quizz> deletedQuizz(@PathVariable("id") Integer id) throws QuizzNotFoundException {
-        quizzService.deleteById(id);
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    @DeleteMapping("/quizzes/{id}")
+    public ResponseEntity<?> deleteQuiz(@PathVariable("id") Integer id) throws QuizzNotFoundException {
+            quizzService.deleteById(id);
+            return ResponseEntity.ok().body("Quiz successfully deleted.");
     }
     // the same :))
     @PostMapping("/add-question/{id}")

@@ -5,16 +5,15 @@ import com.quanchun.backendexamsystem.entities.Quizz;
 import com.quanchun.backendexamsystem.entities.RegisterQuizz;
 import com.quanchun.backendexamsystem.entities.User;
 import com.quanchun.backendexamsystem.error.QuizzNotFoundException;
-import com.quanchun.backendexamsystem.error.UserNotFoundException;
 import com.quanchun.backendexamsystem.mappers.QuizzMapper;
 import com.quanchun.backendexamsystem.mappers.UserMapper;
 import com.quanchun.backendexamsystem.models.QuestionDTO;
 import com.quanchun.backendexamsystem.models.QuizzDTO;
 import com.quanchun.backendexamsystem.models.UserDTO;
+import com.quanchun.backendexamsystem.models.responses.ResponseQuizDTO;
 import com.quanchun.backendexamsystem.repositories.QuizzRepository;
 import com.quanchun.backendexamsystem.services.QuizzService;
 import com.quanchun.backendexamsystem.services.UserService;
-import jakarta.annotation.PostConstruct;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +21,6 @@ import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -36,37 +34,6 @@ public class QuizzServiceImpl implements QuizzService {
     @Autowired
     private UserService userService;
 
-    @PostConstruct
-    public void initDB()
-    {
-        List<Quizz> quizzes = new ArrayList<>();
-        Random random = new Random();
-
-        for (int i = 0; i < 200; i++) {
-            Quizz quizz = new Quizz();
-            quizz.setId(i + 1); // Assuming id starts from 1
-            quizz.setCreatedAt(randomDate());
-            quizz.setStartedAt(randomDate());
-            quizz.setEndedAt(randomDate());
-            quizz.setTitle("Quizz " + (i + 1));
-            quizz.setDescription("Description for Quizz " + (i + 1));
-            quizz.setDifficulty(random.nextInt(10) + 1); // Random difficulty from 1 to 10
-            quizz.setScore(random.nextInt(100)); // Random score
-            quizz.setType(random.nextInt(2)); // Random type
-            quizz.setHostId(random.nextInt(1000) + 1); // Assuming hostId starts from 1 and goes up to 1000
-
-            quizzes.add(quizz);
-        }
-
-        quizzRepository.saveAll(quizzes);
-    }
-    private java.sql.Date randomDate()
-    {
-        long millisInYear = 365L * 24 * 60 * 60 * 1000;
-        long currentTimeMillis = System.currentTimeMillis();
-        long randomMillis = (long) (Math.random() * millisInYear);
-        return new java.sql.Date(currentTimeMillis - randomMillis);
-    }
     @Override
     @Transactional
     public Quizz addQuizz(QuizzDTO theQuizz) {
@@ -121,9 +88,10 @@ public class QuizzServiceImpl implements QuizzService {
     }
 
     @Override
-    public List<Quizz> getAllQuizzes() {
-        List<Quizz> quizzes = quizzRepository.findAll();
-        return quizzes;
+    public List<ResponseQuizDTO> getAllQuizzes() {
+        List<ResponseQuizDTO> responseQuizDTOList = new ArrayList<>();
+                quizzRepository.findAll().forEach(quizz -> responseQuizDTOList.add(toResponseQuizDTO(quizz)));
+        return responseQuizDTOList;
     }
 
     @Override
@@ -134,7 +102,6 @@ public class QuizzServiceImpl implements QuizzService {
             throw new QuizzNotFoundException("Quizz with id " + id + "not found");
         }
         Quizz quizz = foundedQuizz.get();
-        System.out.println(updatedQuizz.toString());
         if(Objects.nonNull((Integer) updatedQuizz.getHostId()))
         {
             quizz.setHostId(updatedQuizz.getHostId());
@@ -204,6 +171,8 @@ public class QuizzServiceImpl implements QuizzService {
     }
 
 
+
+
     @Override
     @Transactional
     public void deleteById(int theId) throws QuizzNotFoundException {
@@ -213,12 +182,9 @@ public class QuizzServiceImpl implements QuizzService {
             //throw exception
             throw new QuizzNotFoundException("Quizz with id " + theId + "not found");
         }
-        Quizz deletedQuizz = optionalQuizz.get();
-        for(Question question:deletedQuizz.getQuestions())
-        {
 
-        }
         quizzRepository.deleteById(theId);
+
     }
 
     @Override
@@ -236,6 +202,33 @@ public class QuizzServiceImpl implements QuizzService {
                         .collect(Collectors.toList());
         // mapper
         return UserMapper.MAPPER.toResponses(users);
+    }
+
+    @Override
+    public ResponseQuizDTO toResponseQuizDTO(Quizz quizz) {
+        List<QuestionDTO> questionItemDTOList = new ArrayList<>();
+
+        quizz.getQuestions().forEach((question) -> {
+            List<String> optionAnswers = new ArrayList<>();
+            question.getQuestionAnswers().forEach(questionAnswer -> optionAnswers.add(questionAnswer.getAnswer()));
+            questionItemDTOList.add(
+                     QuestionDTO.builder()
+                            .question(question.getQuestionContent())
+                            .optionAnswers(optionAnswers)
+                            .answer(question.getCorrectedAnswer())
+                            .build());
+        });
+
+        return ResponseQuizDTO.builder()
+                .id(quizz.getId())
+                .hostId(quizz.getHostId())
+                .title(quizz.getTitle())
+                .description(quizz.getDescription())
+                .duration(quizz.getDuration())
+                .type(quizz.getType())
+                .subject(quizz.getSubject())
+                .questionList(questionItemDTOList)
+                .build();
     }
 
     @Override
@@ -277,6 +270,9 @@ public class QuizzServiceImpl implements QuizzService {
         else quizzes = quizzRepository.findAll(pageable).map(quizz -> QuizzMapper.MAPPER.quizz2QuizzDTO(quizz));
         return quizzes;
     }
+
+
+
     private Date calculateStartTime(String period) {
         Date now = new Date();
         long millisecondsInDay = 24 * 60 * 60 * 1000L; // Milliseconds in a day

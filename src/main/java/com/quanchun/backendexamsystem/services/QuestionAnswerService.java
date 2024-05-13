@@ -1,18 +1,29 @@
 package com.quanchun.backendexamsystem.services;
 
 import com.quanchun.backendexamsystem.entities.QuestionAnswer;
+import com.quanchun.backendexamsystem.error.OptionAnswerNotFoundException;
+import com.quanchun.backendexamsystem.models.OptionAnswerDTO;
 import com.quanchun.backendexamsystem.models.QuestionAnswerDTO;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 public interface QuestionAnswerService {
-    List<QuestionAnswer> getAnswersByQuizzId(int quizzId);
 
-    QuestionAnswer getAnswerByQuizzAndAnswerId(int quizzId, int answerId);
 
-    QuestionAnswer addQuestionAnswer(QuestionAnswer answer);
+    OptionAnswerDTO toOptionAnswerDTO(QuestionAnswer questionAnswer);
 
-    QuestionAnswer updatedQuestionAnswer(int quizzId, int answerId, QuestionAnswerDTO answerDTO);
 
-    QuestionAnswer deletedQuestionAnswer(int quizzId, int answerId);
+
+    QuestionAnswer toQuestionAnswer(OptionAnswerDTO optionAnswerDTO, boolean status);
+
+    @Transactional
+    QuestionAnswer addQuestionAnswer(OptionAnswerDTO optionAnswerDTO);
+
+    QuestionAnswer getQuestionAnswer(int id);
+
+    QuestionAnswer updateOptionAnswer(int id, OptionAnswerDTO optionAnswerDTO) throws OptionAnswerNotFoundException;
+
+
+    boolean deletedQuestionAnswer(int id);
 }

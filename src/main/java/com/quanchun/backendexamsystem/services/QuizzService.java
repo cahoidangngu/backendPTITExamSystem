@@ -6,6 +6,7 @@ import com.quanchun.backendexamsystem.error.UserNotFoundException;
 import com.quanchun.backendexamsystem.models.QuestionDTO;
 import com.quanchun.backendexamsystem.models.QuizzDTO;
 import com.quanchun.backendexamsystem.models.UserDTO;
+import com.quanchun.backendexamsystem.models.responses.ResponseQuizDTO;
 import org.springframework.data.domain.Page;
 
 import java.util.Date;
@@ -19,7 +20,7 @@ public interface QuizzService {
 
     Quizz findQuizzById(int id);
 
-    List<Quizz> getAllQuizzes();
+    List<ResponseQuizDTO> getAllQuizzes();
 
     Quizz updateQuizzById(int id, QuizzDTO updatedQuizz) throws QuizzNotFoundException;
 
@@ -27,6 +28,8 @@ public interface QuizzService {
     List<Quizz> getQuizzesByHostId(int hostId);
 
     List<UserDTO> getUsersByQuizzesId(int quizzId) throws QuizzNotFoundException;
+
+    ResponseQuizDTO toResponseQuizDTO (Quizz quizz);
 
     Page<QuizzDTO> getQuizzesWithSortingAndPagingAndFilter(String field, String order, Integer page, Integer pageSize, Integer difficulty, String preDateOption);
     void deleteById(int theId) throws QuizzNotFoundException;

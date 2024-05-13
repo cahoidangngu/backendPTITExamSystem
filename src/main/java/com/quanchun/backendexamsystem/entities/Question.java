@@ -22,11 +22,11 @@ public class Question {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "question_id")
     private Integer id;
-    @Column(name = "quizz_question")
+    @Column(name = "question_content")
     private String questionContent;
-    @Column(name = "question_difficulty")
+    @Column(name = "difficulty")
     private Integer difficulty;
-    @Column(name = "question_multianswer")
+    @Column(name = "multi_answer")
     private Integer multianswer;
     @Column(name = "correct_answer")
     private Integer correctedAnswer;

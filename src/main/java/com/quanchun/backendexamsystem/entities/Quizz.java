@@ -7,6 +7,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 import java.sql.Date;
+import java.sql.Time;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -41,10 +42,14 @@ public class Quizz {
     private Date startedAt;
     @Column(name = "ended_at")
     private Date endedAt;
+    @Column(name = "duration")
+    private Integer duration;
     @Column(name = "score")
     private Integer score;
     @Column(name = "type")
     private Integer type;
+    @Column(name = "subject")
+    private String subject;
 
     @JsonManagedReference
     @OneToMany(mappedBy = "quizz",cascade = CascadeType.ALL, orphanRemoval = true)
