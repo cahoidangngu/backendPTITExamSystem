@@ -7,11 +7,13 @@ import com.quanchun.backendexamsystem.entities.User;
 import com.quanchun.backendexamsystem.error.QuizzNotFoundException;
 import com.quanchun.backendexamsystem.mappers.QuizzMapper;
 import com.quanchun.backendexamsystem.mappers.UserMapper;
+import com.quanchun.backendexamsystem.models.OptionAnswerDTO;
 import com.quanchun.backendexamsystem.models.QuestionDTO;
 import com.quanchun.backendexamsystem.models.QuizzDTO;
 import com.quanchun.backendexamsystem.models.UserDTO;
 import com.quanchun.backendexamsystem.models.responses.ResponseQuizDTO;
 import com.quanchun.backendexamsystem.repositories.QuizzRepository;
+import com.quanchun.backendexamsystem.services.QuestionAnswerService;
 import com.quanchun.backendexamsystem.services.QuizzService;
 import com.quanchun.backendexamsystem.services.UserService;
 import jakarta.persistence.EntityManager;
@@ -29,7 +31,7 @@ public class QuizzServiceImpl implements QuizzService {
     @Autowired
     private QuizzRepository quizzRepository;
     @Autowired
-    private EntityManager entityManager;
+    private QuestionAnswerService questionAnswerService;
 
     @Autowired
     private UserService userService;
@@ -68,9 +70,9 @@ public class QuizzServiceImpl implements QuizzService {
         {
             Question tmp = Question.builder()
                     .category(q.getCategory())
-                    .correctedAnswer(q.getCorrectedAnswer())
+                    .correctedAnswer(q.getAnswer())
                     //.questionAnswers(q.getQuestionAnswers())
-                    .questionContent(q.getQuestionContent())
+                    .questionContent(q.getQuestion())
                     .multianswer(q.getMultianswer())
                     .difficulty(q.getDifficulty())
                     .build();
@@ -82,8 +84,9 @@ public class QuizzServiceImpl implements QuizzService {
 
 
     @Override
-    public Quizz findQuizzById(int id) {
+    public Quizz findQuizzById(int id) throws QuizzNotFoundException {
         Optional<Quizz> theQuizz = quizzRepository.findById(id);
+        if(theQuizz.isEmpty())throw new QuizzNotFoundException("Not found quiz with id:" +id);
         return theQuizz.get();
     }
 
@@ -150,27 +153,12 @@ public class QuizzServiceImpl implements QuizzService {
         return quizzRepository.save(quizz);
     }
 
-    @Override
-    public List<Quizz> getQuizzesByDifficulty(int difficulty) {
-        TypedQuery<Quizz> request = entityManager.createQuery(
-                "select a from Quizz a where a.difficulty = :data", Quizz.class);
-        request.setParameter("data", difficulty);
-        List<Quizz> result = request.getResultList();
-        return result;
-    }
+
 
     @Override
     public List<Quizz> getQuizzesByHostId(int hostId) {
-        TypedQuery<Quizz> request = entityManager.createQuery(
-                "select a from Quizz a "
-                + "JOIN FETCH a.questions "
-                + "where a.hostId = :data", Quizz.class);
-        request.setParameter("data", hostId);
-        List<Quizz> result = request.getResultList();
-        return result;
+        return quizzRepository.findByHostId(hostId);
     }
-
-
 
 
     @Override
@@ -209,8 +197,8 @@ public class QuizzServiceImpl implements QuizzService {
         List<QuestionDTO> questionItemDTOList = new ArrayList<>();
 
         quizz.getQuestions().forEach((question) -> {
-            List<String> optionAnswers = new ArrayList<>();
-            question.getQuestionAnswers().forEach(questionAnswer -> optionAnswers.add(questionAnswer.getAnswer()));
+            List<OptionAnswerDTO> optionAnswers = new ArrayList<>();
+            question.getQuestionAnswers().forEach(questionAnswer -> optionAnswers.add(questionAnswerService.toOptionAnswerDTO(questionAnswer)));
             questionItemDTOList.add(
                      QuestionDTO.builder()
                             .question(question.getQuestionContent())

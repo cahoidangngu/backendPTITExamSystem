@@ -35,14 +35,6 @@ public class RegisterQuizz {
 
     @Column(name = "status")
     private int status;
-    @Column(name = "score")
-    private int score;
-
-    @Column(name = "started_time")
-    private Date startedTime;
-
-    @Column(name = "finished_time")
-    private Date finishedTime;
 
     @Column(name = "end_time")
     private Date endTime;
@@ -51,24 +43,16 @@ public class RegisterQuizz {
     private Date beginTime;
 
     @OneToMany(
-           cascade = CascadeType.ALL,
+            cascade = CascadeType.ALL,
             fetch = FetchType.EAGER
     )
     @JoinColumn(name = "register_quizz_id")
-    private List<ParticipantAnswer> participantAnswerList;
+    private List<ParticipantAttempt> participantAttemptList;
 
-    public RegisterQuizz(Quizz quizz, User user, int status, int score, Date startedTime, Date finishedTime)
-    {
-        this.status = status;
-        this.score = score;
-        this.startedTime = startedTime;
-        this.finishedTime = finishedTime;
-        participantAnswerList = new ArrayList<>();
-    }
 
-    public void addParticipantAnswer(ParticipantAnswer participantAnswer){
-        if(participantAnswerList==null) participantAnswerList = new ArrayList<>();
-        participantAnswerList.add(participantAnswer);
+    public void addParticipantAttempt(ParticipantAttempt participantAttempt){
+        if(participantAttemptList==null) participantAttemptList = new ArrayList<>();
+        participantAttemptList.add(participantAttempt);
     }
 
 }

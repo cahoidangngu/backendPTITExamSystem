@@ -18,13 +18,12 @@ public interface QuizzService {
     Quizz addQuestions(int id, List<QuestionDTO> questions) throws QuizzNotFoundException;
 
 
-    Quizz findQuizzById(int id);
+    Quizz findQuizzById(int id) throws QuizzNotFoundException;
 
     List<ResponseQuizDTO> getAllQuizzes();
 
     Quizz updateQuizzById(int id, QuizzDTO updatedQuizz) throws QuizzNotFoundException;
 
-    List<Quizz> getQuizzesByDifficulty(int difficulty);
     List<Quizz> getQuizzesByHostId(int hostId);
 
     List<UserDTO> getUsersByQuizzesId(int quizzId) throws QuizzNotFoundException;

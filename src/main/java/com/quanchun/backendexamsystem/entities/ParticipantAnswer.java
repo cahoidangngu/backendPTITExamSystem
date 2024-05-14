@@ -23,8 +23,8 @@ public class ParticipantAnswer {
     private int questionId;
 
     @Id
-    @Column(name = "register_quizz_id")
-    private int registerQuizzId;
+    @Column(name = "participant_attempt_id")
+    private int participantAttemptId;
 
     @NotNull
     private int userAnswer;

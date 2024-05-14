@@ -2,12 +2,12 @@ package com.quanchun.backendexamsystem.services.impls;
 
 import com.quanchun.backendexamsystem.entities.ParticipantAnswer;
 import com.quanchun.backendexamsystem.repositories.ParticipantRepository;
-import com.quanchun.backendexamsystem.services.ParticipantService;
+import com.quanchun.backendexamsystem.services.ParticipantAnswerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-public class ParticipantServiceImpl implements ParticipantService {
+public class ParticipantAnswerServiceImpl implements ParticipantAnswerService {
 
     @Autowired
     private ParticipantRepository participantRepository;

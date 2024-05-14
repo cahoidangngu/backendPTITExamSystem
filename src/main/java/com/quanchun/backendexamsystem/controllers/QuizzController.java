@@ -55,34 +55,6 @@ public class QuizzController {
         return new ResponseEntity<>(quizzService.findQuizzById(id), HttpStatus.OK) ;
     }
 
-    // test ok
-    // for each teacher
-    @GetMapping("/quizzes/filter")
-    public List<Quizz> getQuizzesByFilter(@RequestParam(required = false) @Min(1) @Max(3) Integer difficulty, @RequestParam Integer hostId)
-    {
-        List<Quizz> quizzes = new ArrayList<>();
-        if (difficulty != null)
-        {
-            Map<Quizz, Integer> mp = new LinkedHashMap<>();
-            quizzService.getQuizzesByHostId(hostId).forEach(quizz -> {
-                if(!mp.containsKey(quizz)) mp.put(quizz, 1);
-                else {
-                    mp.put(quizz, mp.get(quizz) + 1);
-                }
-            });
-            quizzService.getQuizzesByDifficulty(difficulty).forEach(quizz -> {
-                if(mp.get(quizz) >= 1)
-                {
-                    quizzes.add(quizz);
-                }
-            });
-        }
-        else
-        {
-            quizzService.getQuizzesByHostId(hostId).forEach(quizzes::add);
-        }
-        return quizzes;
-    }
 
 
     // test ok

@@ -5,9 +5,16 @@ import com.quanchun.backendexamsystem.error.OptionAnswerNotFoundException;
 import com.quanchun.backendexamsystem.models.OptionAnswerDTO;
 import com.quanchun.backendexamsystem.repositories.QuestionAnswerRepository;
 import com.quanchun.backendexamsystem.services.QuestionAnswerService;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.TypedQuery;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+import java.util.Objects;
+
+@Service
 public class QuestionAnswerServiceImpl implements QuestionAnswerService {
     @Autowired
     QuestionAnswerRepository questionAnswerRepository;
@@ -24,7 +31,6 @@ public class QuestionAnswerServiceImpl implements QuestionAnswerService {
             return QuestionAnswer.builder().answer(optionAnswerDTO.getContent()).build();
         return QuestionAnswer.builder().qaId(optionAnswerDTO.getId()).answer(optionAnswerDTO.getContent()).build();
     }
-
 
     @Override
     @Transactional

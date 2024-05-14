@@ -16,7 +16,7 @@ import java.util.List;
 public interface UserService {
     User addNewUser(UserDTO newUser) throws RoleNotFoundException;
 
-    Page<User> getAllUser() throws UserNotFoundException;
+    List<User> getAllUser() throws UserNotFoundException;
 
     User getUserById(Long userId) throws UserNotFoundException;
     List<QuizzDTO> getQuizzesByUserId(Long userId) throws UserNotFoundException;

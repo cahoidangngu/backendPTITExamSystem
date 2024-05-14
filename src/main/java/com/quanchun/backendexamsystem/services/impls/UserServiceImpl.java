@@ -62,10 +62,10 @@ public class UserServiceImpl implements UserService {
 
 
     @Override
-    public Page<User> getAllUser() throws UserNotFoundException{
+    public List<User> getAllUser() throws UserNotFoundException{
         List<User> users = userRepository.findAll();
         if(users.isEmpty()) throw new UserNotFoundException("No users in list");
-        return (Page<User>) userRepository.findAll();
+        return userRepository.findAll();
     }
 
     @Override

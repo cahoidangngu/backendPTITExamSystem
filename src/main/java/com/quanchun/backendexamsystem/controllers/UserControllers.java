@@ -6,7 +6,6 @@ import com.quanchun.backendexamsystem.entities.User;
 import com.quanchun.backendexamsystem.error.*;
 import com.quanchun.backendexamsystem.models.*;
 import com.quanchun.backendexamsystem.models.requests.ParticipantAttemptRequestDTO;
-import com.quanchun.backendexamsystem.models.requests.RegisterQuizzRequest;
 import com.quanchun.backendexamsystem.models.responses.ParticipantAttemptResponseDTO;
 import com.quanchun.backendexamsystem.models.responses.ResponseRegisterQuizzDTO;
 import com.quanchun.backendexamsystem.services.RegisterQuizzService;
@@ -46,9 +45,10 @@ public class UserControllers {
     }
 
 //    test ok
-    @PostMapping("users/register-quizz/{quizzId}")
-    public ResponseEntity<ResponseRegisterQuizzDTO> register(@PathVariable("quizzId") int quizzId, @RequestBody RegisterQuizzRequest registerQuizzRequest) throws UserNotFoundException, QuizzNotFoundException {
-        ResponseRegisterQuizzDTO registerQuizz = registerService.registerQuizz(quizzId, registerQuizzRequest);
+    @PostMapping("users/{userId}/register-quizz/{quizzId}")
+    public ResponseEntity<ResponseRegisterQuizzDTO> register(@PathVariable("userId")long userId, @PathVariable(
+            "quizzId") int quizzId) throws UserNotFoundException, QuizzNotFoundException {
+        ResponseRegisterQuizzDTO registerQuizz = registerService.registerQuizz(userId, quizzId);
         return new ResponseEntity<>(registerQuizz, HttpStatus.OK);
     }
 
