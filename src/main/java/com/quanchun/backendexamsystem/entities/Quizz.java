@@ -24,7 +24,6 @@ public class Quizz {
     @Column(name = "quizz_id")
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @JsonIgnore
     private int id;
     @Column(name = "host_id")
     private int hostId;
@@ -62,6 +61,9 @@ public class Quizz {
     )
     private List<Question> questions;
 
+    public Quizz(int id){
+        this.id = id;
+    }
 //    @ManyToMany(
 //            cascade = {CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.DETACH}
 //    )

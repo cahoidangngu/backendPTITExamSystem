@@ -16,6 +16,7 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 public class QuizzDTO {
+    private int id;
     @NotBlank
     private int hostId;
     @NotBlank

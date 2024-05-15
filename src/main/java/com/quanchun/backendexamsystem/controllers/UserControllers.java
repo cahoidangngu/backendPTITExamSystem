@@ -17,7 +17,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api")
@@ -99,8 +101,11 @@ public class UserControllers {
 
     // test ok, but we need to map a dto not to show too much information
     @GetMapping("/users/{userId}/quizzes")
-    public ResponseEntity<List<QuizzDTO>> getQuizzes4StudentId(@PathVariable("userId") int userId) throws UserNotFoundException {
-        return new ResponseEntity<>(userService.getQuizzesByUserId((long) userId), HttpStatus.OK);
+    public ResponseEntity<Map<String, List<QuizzDTO>>> getQuizzes4StudentId(@PathVariable("userId") int userId) throws UserNotFoundException {
+        List<QuizzDTO> dtos = userService.getQuizzesByUserId((long) userId);
+        Map<String, List<QuizzDTO>> response = new HashMap<>();
+        response.put("content", dtos);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     // test ok

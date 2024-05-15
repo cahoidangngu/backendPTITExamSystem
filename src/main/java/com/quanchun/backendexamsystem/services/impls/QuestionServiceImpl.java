@@ -17,6 +17,7 @@ import com.quanchun.backendexamsystem.repositories.UserRepository;
 import com.quanchun.backendexamsystem.services.QuestionService;
 import jakarta.annotation.PostConstruct;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.Query;
 import jakarta.persistence.TypedQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -25,6 +26,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,6 +39,8 @@ import java.util.*;
 public class QuestionServiceImpl implements QuestionService {
     @Autowired
     private QuestionRepository questionRepository;
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
     @Autowired
     private QuizzRepository quizzRepository;
     @Autowired
@@ -51,28 +55,29 @@ public class QuestionServiceImpl implements QuestionService {
 
         for (int i = 0; i < 200; i++) {
             Question question = new Question();
-            question.setId(i + 1); // Assuming id starts from 1
+            //question.setId(i + 1); // Assuming id starts from 1
             question.setQuestionContent("Question " + (i + 1));
             question.setMultianswer(4);
             question.setDifficulty(random.nextInt(10) + 1); // Random difficulty from 1 to 10
             question.setCorrectedAnswer(random.nextInt(4) + 1); // Random correct answer from 1 to 4
             question.setCategory("Category " + (random.nextInt(10) + 1)); // Random category
-            question.setQuestionAnswers(generateAnswers());
-
+            question.setQuestionAnswers(generateAnswers(i));
+            int idx = i/40 + 1;
+//            question.addQuizz(new Quizz(idx));
             questionRepository.save(question);
         }
     }
-    private List<QuestionAnswer> generateAnswers() {
+    private List<QuestionAnswer> generateAnswers(int n) {
         List<QuestionAnswer> answers = new ArrayList<>();
         Random random = new Random();
 
         for (int i = 0; i < 4; i++) {
             QuestionAnswer answer = new QuestionAnswer();
-            answer.setQaId(i + 1); // Assuming id starts from 1
-            answer.setAnswer("Answer " + (i + 1));
+            //answer.setQaId(n + i + 1); // Assuming id starts from 1
+            answer.setAnswer("Answer " + (i + 1) + "for question " + (n + 1));
             answers.add(answer);
         }
-        questionAnswerRepository.saveAll(answers);
+        //questionAnswerRepository.saveAll(answers);
         return answers;
     }
     @Override

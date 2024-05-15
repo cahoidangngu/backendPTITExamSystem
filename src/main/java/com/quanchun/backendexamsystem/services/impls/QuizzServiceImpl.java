@@ -1,9 +1,6 @@
 package com.quanchun.backendexamsystem.services.impls;
 
-import com.quanchun.backendexamsystem.entities.Question;
-import com.quanchun.backendexamsystem.entities.Quizz;
-import com.quanchun.backendexamsystem.entities.RegisterQuizz;
-import com.quanchun.backendexamsystem.entities.User;
+import com.quanchun.backendexamsystem.entities.*;
 import com.quanchun.backendexamsystem.error.QuizzNotFoundException;
 import com.quanchun.backendexamsystem.error.UserNotFoundException;
 import com.quanchun.backendexamsystem.mappers.QuizzMapper;
@@ -11,6 +8,7 @@ import com.quanchun.backendexamsystem.mappers.UserMapper;
 import com.quanchun.backendexamsystem.models.QuestionDTO;
 import com.quanchun.backendexamsystem.models.QuizzDTO;
 import com.quanchun.backendexamsystem.models.UserDTO;
+import com.quanchun.backendexamsystem.repositories.QuestionRepository;
 import com.quanchun.backendexamsystem.repositories.QuizzRepository;
 import com.quanchun.backendexamsystem.services.QuizzService;
 import com.quanchun.backendexamsystem.services.UserService;
@@ -44,7 +42,7 @@ public class QuizzServiceImpl implements QuizzService {
 
         for (int i = 0; i < 200; i++) {
             Quizz quizz = new Quizz();
-            quizz.setId(i + 1); // Assuming id starts from 1
+//            quizz.setId(i + 1); // Assuming id starts from 1
             quizz.setCreatedAt(randomDate());
             quizz.setStartedAt(randomDate());
             quizz.setEndedAt(randomDate());
@@ -67,6 +65,9 @@ public class QuizzServiceImpl implements QuizzService {
         long randomMillis = (long) (Math.random() * millisInYear);
         return new java.sql.Date(currentTimeMillis - randomMillis);
     }
+
+
+
     @Override
     @Transactional
     public Quizz addQuizz(QuizzDTO theQuizz) {
