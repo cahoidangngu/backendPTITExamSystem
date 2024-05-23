@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class RoleDTO {
-    @NotBlank
+
+    private int id;
     private String name;
 }

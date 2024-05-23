@@ -20,7 +20,7 @@ public interface QuestionAnswerService {
     @Transactional
     QuestionAnswer addQuestionAnswer(OptionAnswerDTO optionAnswerDTO);
 
-    QuestionAnswer getQuestionAnswer(int id);
+    QuestionAnswer getQuestionAnswer(int id) throws OptionAnswerNotFoundException;
 
     QuestionAnswer updateOptionAnswer(int id, OptionAnswerDTO optionAnswerDTO) throws OptionAnswerNotFoundException;
 

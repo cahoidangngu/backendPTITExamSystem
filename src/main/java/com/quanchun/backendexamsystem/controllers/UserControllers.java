@@ -7,6 +7,7 @@ import com.quanchun.backendexamsystem.error.*;
 import com.quanchun.backendexamsystem.models.*;
 import com.quanchun.backendexamsystem.models.requests.ParticipantAttemptRequestDTO;
 import com.quanchun.backendexamsystem.models.responses.ParticipantAttemptResponseDTO;
+import com.quanchun.backendexamsystem.models.responses.QuizDTO;
 import com.quanchun.backendexamsystem.models.responses.ResponseRegisterQuizzDTO;
 import com.quanchun.backendexamsystem.services.RegisterQuizzService;
 import com.quanchun.backendexamsystem.services.RoleService;
@@ -14,6 +15,7 @@ import com.quanchun.backendexamsystem.services.StatisticsService;
 import com.quanchun.backendexamsystem.services.UserService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -93,13 +95,20 @@ public class UserControllers {
 
     // test ok
     @GetMapping("/users")
-    public ResponseEntity<List<User>> fetchAllUsers() throws UserNotFoundException{
-        return new ResponseEntity<>( userService.getAllUser(), HttpStatus.OK);
+    public ResponseEntity<Page<User>> fetchAllUsers(@RequestParam(value = "pageSize", required = false) Integer pageSize,
+                                                    @RequestParam(value = "page", required = false) Integer page,
+                                                    @RequestParam(value = "field", required = false) String field) throws UserNotFoundException{
+        return new ResponseEntity<>(userService.getUserWithSortAndPagination(field, page, pageSize), HttpStatus.OK);
+    }
+
+    @GetMapping("/students")
+    public ResponseEntity<List<UserDTO>> fetchAllStudents() throws UserNotFoundException, RoleNotFoundException {
+        return new ResponseEntity<>(userService.getAllStudent(), HttpStatus.OK);
     }
 
     // test ok, but we need to map a dto not to show too much information
     @GetMapping("/users/{userId}/quizzes")
-    public ResponseEntity<List<QuizzDTO>> getQuizzes4StudentId(@PathVariable("userId") int userId) throws UserNotFoundException {
+    public ResponseEntity<List<QuizDTO>> getQuizzes4StudentId(@PathVariable("userId") int userId) throws UserNotFoundException {
         return new ResponseEntity<>(userService.getQuizzesByUserId((long) userId), HttpStatus.OK);
     }
 
@@ -111,13 +120,13 @@ public class UserControllers {
 
 
     @PostMapping("/doing-quizz/{registerQuizzId}")
-    public ResponseEntity<ParticipantAttemptResponseDTO> userStartQuizz(@PathVariable("registerQuizzId") int registerQuizzId) throws RegisterQuizzNotFoundException {
+    public ResponseEntity<ParticipantAttemptResponseDTO> userStartQuizz(@PathVariable("registerQuizzId") int registerQuizzId) throws RegisterQuizzNotFoundException, QuestionNotFoundException {
         return new ResponseEntity<>(registerService.createParticipantAttempt(registerQuizzId), HttpStatus.OK);
     }
 
     //test ok
     @PostMapping("/submit-quizz/{participantAttemptId}")
-    public ResponseEntity<ParticipantAttemptResponseDTO> userSubmitQuizz(@PathVariable("participantAttemptId") int participantAttemptId, @RequestBody ParticipantAttemptRequestDTO participantAttemptRequestDTO) throws  ParticipantAttemptNotFoundException {
+    public ResponseEntity<ParticipantAttemptResponseDTO> userSubmitQuizz(@PathVariable("participantAttemptId") int participantAttemptId, @RequestBody ParticipantAttemptRequestDTO participantAttemptRequestDTO) throws  ParticipantAttemptNotFoundException, QuestionNotFoundException {
         return new ResponseEntity<>(registerService.submitParticipantAttempt(participantAttemptId, participantAttemptRequestDTO), HttpStatus.OK);
     }
 

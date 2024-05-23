@@ -1,31 +1,27 @@
 package com.quanchun.backendexamsystem.services.impls;
 
-import com.quanchun.backendexamsystem.entities.Question;
-import com.quanchun.backendexamsystem.entities.Quizz;
-import com.quanchun.backendexamsystem.entities.RegisterQuizz;
-import com.quanchun.backendexamsystem.entities.User;
+import com.quanchun.backendexamsystem.entities.*;
+import com.quanchun.backendexamsystem.error.QuestionNotFoundException;
 import com.quanchun.backendexamsystem.error.QuizzNotFoundException;
-import com.quanchun.backendexamsystem.mappers.QuizzMapper;
 import com.quanchun.backendexamsystem.mappers.UserMapper;
-import com.quanchun.backendexamsystem.models.OptionAnswerDTO;
 import com.quanchun.backendexamsystem.models.QuestionDTO;
-import com.quanchun.backendexamsystem.models.QuizzDTO;
 import com.quanchun.backendexamsystem.models.UserDTO;
-import com.quanchun.backendexamsystem.models.responses.ResponseQuizDTO;
+import com.quanchun.backendexamsystem.models.responses.QuizDTO;
 import com.quanchun.backendexamsystem.repositories.QuizzRepository;
 import com.quanchun.backendexamsystem.services.QuestionAnswerService;
+import com.quanchun.backendexamsystem.services.QuestionService;
 import com.quanchun.backendexamsystem.services.QuizzService;
-import com.quanchun.backendexamsystem.services.UserService;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.TypedQuery;
+import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 public class QuizzServiceImpl implements QuizzService {
     @Autowired
@@ -34,26 +30,86 @@ public class QuizzServiceImpl implements QuizzService {
     private QuestionAnswerService questionAnswerService;
 
     @Autowired
-    private UserService userService;
+    private QuestionService questionService;
+
+    private Logger logger = LoggerFactory.getLogger(QuizzService.class);
+
+
+    @Override
+    public Quizz toQuizz(QuizDTO quizDTO, boolean status) {
+        List<Question> questionList = new ArrayList<>();
+        quizDTO.getQuestionList().forEach(questionDTO -> {
+                                              try {
+                                                  if (questionService.findQuestionById(questionDTO.getId()) == null)
+                                                      questionList.add(questionService.toQuestion(questionDTO,
+                                                                                                  true));
+                                                  else
+                                                      questionList.add(questionService.toQuestion(questionDTO,
+                                                                                                  false));
+                                              } catch (QuestionNotFoundException e) {
+                                                  throw new RuntimeException(e);
+                                              }
+                                          }
+        );
+
+        if (status)
+            return Quizz.builder()
+                        .description(quizDTO.getDescription())
+                        .endedAt(quizDTO.getEndedAt())
+                        .title(quizDTO.getTitle())
+                        .type(quizDTO.getType())
+                        .difficulty(quizDTO.getDifficulty())
+                        .startedAt(quizDTO.getStartedAt())
+                        .createdAt(quizDTO.getCreatedAt())
+                        .hostId(quizDTO.getHostId())
+                        .questions(questionList)
+                        .build();
+        return Quizz.builder()
+                    .id(quizDTO.getId())
+                    .description(quizDTO.getDescription())
+                    .endedAt(quizDTO.getEndedAt())
+                    .title(quizDTO.getTitle())
+                    .type(quizDTO.getType())
+                    .difficulty(quizDTO.getDifficulty())
+                    .startedAt(quizDTO.getStartedAt())
+                    .createdAt(quizDTO.getCreatedAt())
+                    .hostId(quizDTO.getHostId())
+                    .questions(questionList)
+                    .build();
+    }
+
+    @Override
+    public QuizDTO toQuizDTO(Quizz quizz) {
+        List<QuestionDTO> questionItemDTOList = new ArrayList<>();
+
+        quizz.getQuestions().forEach((question) -> {
+            QuestionDTO questionItemDTO = questionService.toQuestionDTO(question);
+            question.getQuestionAnswers()
+                    .forEach(questionAnswer -> questionItemDTO.addOptionAnswer(
+                            questionAnswerService.toOptionAnswerDTO(questionAnswer)));
+            questionItemDTOList.add(questionItemDTO);
+        });
+
+        return QuizDTO.builder()
+                      .id(quizz.getId())
+                      .hostId(quizz.getHostId())
+                      .title(quizz.getTitle())
+                      .createdAt(quizz.getCreatedAt())
+                      .startedAt(quizz.getStartedAt())
+                      .endedAt(quizz.getEndedAt())
+                      .description(quizz.getDescription())
+                      .duration(quizz.getDuration())
+                      .type(quizz.getType())
+                      .subject(quizz.getSubject())
+                      .questionList(questionItemDTOList)
+                      .build();
+    }
+
 
     @Override
     @Transactional
-    public Quizz addQuizz(QuizzDTO theQuizz) {
-        Quizz nwQuizz = Quizz.builder()
-                .description(theQuizz.getDescription())
-                .score(theQuizz.getScore())
-                .endedAt(theQuizz.getEndedAt())
-                .title(theQuizz.getTitle())
-                .type(theQuizz.getType())
-                .difficulty(theQuizz.getDifficulty())
-                .startedAt(theQuizz.getStartedAt())
-                .createdAt(theQuizz.getCreatedAt())
-                .hostId(theQuizz.getHostId())
-                .questions(theQuizz.getQuestions())
-                .build();
-        quizzRepository.save(nwQuizz);
-
-        return nwQuizz;
+    public Quizz addQuizz(QuizDTO quizDTO) {
+        return quizzRepository.save(toQuizz(quizDTO, true));
     }
 
     // lien quan den question entity
@@ -61,98 +117,79 @@ public class QuizzServiceImpl implements QuizzService {
     @Transactional
     public Quizz addQuestions(int id, List<QuestionDTO> questions) throws QuizzNotFoundException {
         Optional<Quizz> foundQuizz = quizzRepository.findById(id);
-        if(foundQuizz.isEmpty())
-        {
+        if (foundQuizz.isEmpty()) {
             throw new QuizzNotFoundException("Quizz with id " + id + "not found");
         }
         Quizz quizz = foundQuizz.get();
-        for(QuestionDTO q: questions)
-        {
+        for (QuestionDTO q : questions) {
             Question tmp = Question.builder()
-                    .category(q.getCategory())
-                    .correctedAnswer(q.getAnswer())
-                    //.questionAnswers(q.getQuestionAnswers())
-                    .questionContent(q.getQuestion())
-                    .multianswer(q.getMultianswer())
-                    .difficulty(q.getDifficulty())
-                    .build();
+                                   .category(q.getCategory())
+                                   .correctedAnswer(q.getAnswer())
+                                   //.questionAnswers(q.getQuestionAnswers())
+                                   .questionContent(q.getQuestion())
+                                   .multianswer(q.getMultianswer())
+                                   .difficulty(q.getDifficulty())
+                                   .build();
             quizz.addQuestion(tmp);
         }
         return quizz;
     }
 
 
-
     @Override
     public Quizz findQuizzById(int id) throws QuizzNotFoundException {
         Optional<Quizz> theQuizz = quizzRepository.findById(id);
-        if(theQuizz.isEmpty())throw new QuizzNotFoundException("Not found quiz with id:" +id);
+        if (theQuizz.isEmpty()) throw new QuizzNotFoundException("Not found quiz with id:" + id);
         return theQuizz.get();
     }
 
     @Override
-    public List<ResponseQuizDTO> getAllQuizzes() {
-        List<ResponseQuizDTO> responseQuizDTOList = new ArrayList<>();
-                quizzRepository.findAll().forEach(quizz -> responseQuizDTOList.add(toResponseQuizDTO(quizz)));
-        return responseQuizDTOList;
+    public List<QuizDTO> getAllQuizzes() {
+        List<QuizDTO> quizDTOList = new ArrayList<>();
+        quizzRepository.findAll().forEach(quizz -> quizDTOList.add(toQuizDTO(quizz)));
+        return quizDTOList;
     }
 
     @Override
     @Transactional
-    public Quizz updateQuizzById(int id, QuizzDTO updatedQuizz) throws QuizzNotFoundException {
-        Optional<Quizz> foundedQuizz = quizzRepository.findById(id);
-        if(foundedQuizz.isEmpty()){
-            throw new QuizzNotFoundException("Quizz with id " + id + "not found");
-        }
-        Quizz quizz = foundedQuizz.get();
-        if(Objects.nonNull((Integer) updatedQuizz.getHostId()))
-        {
-            quizz.setHostId(updatedQuizz.getHostId());
-        }
+    public QuizDTO updateQuizzById(int id, QuizDTO updatedQuizz) throws QuizzNotFoundException {
+        Quizz quizz = findQuizzById(id);
 
-        if(Objects.nonNull(updatedQuizz.getTitle()))
-        {
+
+        quizz.setHostId(updatedQuizz.getHostId());
+        quizz.setDuration(updatedQuizz.getDuration());
+        quizz.setType(updatedQuizz.getType());
+        quizz.setDifficulty(updatedQuizz.getDifficulty());
+
+
+        if (Objects.nonNull(updatedQuizz.getTitle())) {
             quizz.setTitle(updatedQuizz.getTitle());
         }
-
-        if(Objects.nonNull((Integer)updatedQuizz.getType()))
-        {
-            quizz.setType(updatedQuizz.getType());
+        if (Objects.nonNull(updatedQuizz.getDescription())) {
+            quizz.setDescription(updatedQuizz.getDescription());
         }
 
-        if(Objects.nonNull((Integer)updatedQuizz.getScore()))
-        {
-            quizz.setScore(updatedQuizz.getScore());
+        if (Objects.nonNull(updatedQuizz.getSubject())) {
+            quizz.setSubject(updatedQuizz.getSubject());
         }
 
-        if(Objects.nonNull(updatedQuizz.getCreatedAt()))
-        {
-            quizz.setCreatedAt(updatedQuizz.getCreatedAt());
+        if (Objects.nonNull(updatedQuizz.getQuestionList())) {
+            List<Question> updateQuestionList = new ArrayList<>();
+            updatedQuizz.getQuestionList().forEach(questionDTO -> {
+                try {
+                    updateQuestionList.add(questionService.updateQuestionById(questionDTO.getId(), questionDTO));
+                } catch (QuestionNotFoundException e) {
+                    Question newQuestion = questionService.addQuestion(questionDTO);
+                    updateQuestionList.add(newQuestion);
+                }
+            });
+            quizz.setQuestions(updateQuestionList);
         }
 
-        if(Objects.nonNull(updatedQuizz.getStartedAt()))
-        {
-            quizz.setStartedAt(updatedQuizz.getStartedAt());
-        }
 
-        if(Objects.nonNull(updatedQuizz.getEndedAt()))
-        {
-            quizz.setEndedAt(updatedQuizz.getEndedAt());
-        }
 
-        if(Objects.nonNull((Integer)updatedQuizz.getDifficulty()))
-        {
-            quizz.setDifficulty(updatedQuizz.getDifficulty());
-        }
-
-//        if(Objects.nonNull(updatedQuizz.getQuestions()))
-//        {
-//            quizz.setQuestions(updatedQuizz.getQuestions());
-//        }
-
-        return quizzRepository.save(quizz);
+        return toQuizDTO(quizzRepository.save(quizz));
     }
-
 
 
     @Override
@@ -165,8 +202,7 @@ public class QuizzServiceImpl implements QuizzService {
     @Transactional
     public void deleteById(int theId) throws QuizzNotFoundException {
         Optional<Quizz> optionalQuizz = quizzRepository.findById(theId);
-        if(optionalQuizz.isEmpty())
-        {
+        if (optionalQuizz.isEmpty()) {
             //throw exception
             throw new QuizzNotFoundException("Quizz with id " + theId + "not found");
         }
@@ -178,87 +214,18 @@ public class QuizzServiceImpl implements QuizzService {
     @Override
     public List<UserDTO> getUsersByQuizzesId(int quizzId) throws QuizzNotFoundException {
         Optional<Quizz> optional = quizzRepository.findById(quizzId);
-        if(optional.isEmpty())
-        {
+        if (optional.isEmpty()) {
             throw new QuizzNotFoundException("Quizz with id " + quizzId + " not found!");
         }
         Quizz quizz = optional.get();
 
-//         users = optional.get().getUsers();
+        //         users = optional.get().getUsers();
         List<User> users = quizz.getRegisterQuizzes().stream()
-                        .map(RegisterQuizz::getUser)
-                        .collect(Collectors.toList());
+                                .map(RegisterQuizz::getUser)
+                                .collect(Collectors.toList());
         // mapper
         return UserMapper.MAPPER.toResponses(users);
     }
-
-    @Override
-    public ResponseQuizDTO toResponseQuizDTO(Quizz quizz) {
-        List<QuestionDTO> questionItemDTOList = new ArrayList<>();
-
-        quizz.getQuestions().forEach((question) -> {
-            List<OptionAnswerDTO> optionAnswers = new ArrayList<>();
-            question.getQuestionAnswers().forEach(questionAnswer -> optionAnswers.add(questionAnswerService.toOptionAnswerDTO(questionAnswer)));
-            questionItemDTOList.add(
-                     QuestionDTO.builder()
-                            .question(question.getQuestionContent())
-                            .optionAnswers(optionAnswers)
-                            .answer(question.getCorrectedAnswer())
-                            .build());
-        });
-
-        return ResponseQuizDTO.builder()
-                .id(quizz.getId())
-                .hostId(quizz.getHostId())
-                .title(quizz.getTitle())
-                .description(quizz.getDescription())
-                .duration(quizz.getDuration())
-                .type(quizz.getType())
-                .subject(quizz.getSubject())
-                .questionList(questionItemDTOList)
-                .build();
-    }
-
-    @Override
-    public Page<QuizzDTO> getQuizzesWithSortingAndPagingAndFilter(String field, String order, Integer page, Integer pageSize, Integer difficulty, String preDateOption) {
-        if(page == null) page = UserServiceImpl.DEFAULT_PAGE;
-        if(pageSize == null) pageSize = UserServiceImpl.DEFAULT_PAGE_SIZE;
-        Pageable pageable;
-        if(field != null && order != null)
-        {
-            Sort.Direction direction = order.equalsIgnoreCase("desc") ? Sort.Direction.DESC : Sort.Direction.ASC;
-            Sort sort = Sort.by(direction, field);
-            pageable = PageRequest.of(page, pageSize, sort);
-        }
-        else
-        {
-            pageable = PageRequest.of(page, pageSize);
-        }
-        Page<QuizzDTO> quizzes;
-        Date startTime;
-        List<QuizzDTO> dtos = new ArrayList<>();
-        if(difficulty != null && preDateOption != null)
-        {
-            startTime = calculateStartTime(preDateOption);
-            quizzes = quizzRepository.findByCreatedAtAfterAndDifficulty(startTime, difficulty, pageable)
-                    .map(quizz -> QuizzMapper.MAPPER.quizz2QuizzDTO(quizz));
-        }
-        else if(difficulty != null)
-        {
-            quizzes = quizzRepository.findQuizzesByDifficulty(difficulty, pageable)
-                    .map(quizz -> QuizzMapper.MAPPER.quizz2QuizzDTO(quizz));
-
-        }
-        else if(preDateOption != null)
-        {
-             startTime = calculateStartTime(preDateOption);
-             quizzes = quizzRepository.findByCreatedAtAfter(startTime, pageable)
-                     .map(quizz -> QuizzMapper.MAPPER.quizz2QuizzDTO(quizz));
-        }
-        else quizzes = quizzRepository.findAll(pageable).map(quizz -> QuizzMapper.MAPPER.quizz2QuizzDTO(quizz));
-        return quizzes;
-    }
-
 
 
     private Date calculateStartTime(String period) {

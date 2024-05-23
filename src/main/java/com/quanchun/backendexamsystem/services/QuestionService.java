@@ -23,7 +23,7 @@ public interface QuestionService {
 
     Question updateQuestionById(int id, QuestionDTO theQuestion) throws QuestionNotFoundException;
 
-    Question findQuestionById(int id);
+    Question findQuestionById(int id)throws QuestionNotFoundException ;
 
     Question deleteQuestionById(int id) throws QuestionNotFoundException;
 

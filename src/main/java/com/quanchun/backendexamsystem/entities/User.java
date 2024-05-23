@@ -1,6 +1,7 @@
 package com.quanchun.backendexamsystem.entities;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 import java.util.*;
@@ -31,34 +32,13 @@ public class User {
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<RegisterQuizz> registerQuizzes;
-    @ManyToMany(
-            cascade = CascadeType.PERSIST
-    )
-    @JoinTable(
-            name = "user_roles",
-            joinColumns = @JoinColumn(
-                    name = "user_id",
-                    referencedColumnName = "userId"
-            ),
-            inverseJoinColumns = @JoinColumn(
-                    name = "role_id",
-                    referencedColumnName = "roleId"
-            )
-    )
-    private Set<Role> roles;
-//    @ManyToMany(
-//            cascade = {CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.DETACH}
-//    )
-//    @JoinTable(
-//            name = "take_quizz",
-//            joinColumns = @JoinColumn(name = "user_id"),
-//            inverseJoinColumns = @JoinColumn(name = "quizz_id")
-//    )
-//    private List<Quizz> quizzes;
-    public void addRole(Role role){
-        if(roles == null)roles = new HashSet<>();
-        roles.add(role);
-    }
+
+
+    @NotNull
+    @ManyToOne
+    @JoinColumn(name = "role_id", referencedColumnName = "roleId")
+    private Role role;
+
     public void addRegisterQuizz(RegisterQuizz rq)
     {
         if(registerQuizzes == null)
@@ -67,6 +47,4 @@ public class User {
         }
         registerQuizzes.add(rq);
     }
-
-
 }

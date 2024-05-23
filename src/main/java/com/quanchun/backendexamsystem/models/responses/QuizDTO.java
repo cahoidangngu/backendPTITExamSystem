@@ -2,11 +2,9 @@ package com.quanchun.backendexamsystem.models.responses;
 
 
 import com.quanchun.backendexamsystem.models.QuestionDTO;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
+import java.sql.Date;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,13 +12,18 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class ResponseQuizDTO {
+@ToString
+public class QuizDTO {
     private int id;
     private int hostId;
     private String title;
     private String description;
     private int type;
     private String subject;
+    private Date createdAt;
+    private Date startedAt;
+    private Date endedAt;
+    private int difficulty;
     private int duration;
     private List<QuestionDTO> questionList;
 

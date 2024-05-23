@@ -5,24 +5,18 @@ import com.quanchun.backendexamsystem.entities.Quizz;
 import com.quanchun.backendexamsystem.error.QuizzExistsException;
 import com.quanchun.backendexamsystem.error.QuizzNotFoundException;
 import com.quanchun.backendexamsystem.models.QuestionDTO;
-import com.quanchun.backendexamsystem.models.QuizzDTO;
 import com.quanchun.backendexamsystem.models.UserDTO;
-import com.quanchun.backendexamsystem.models.responses.ResponseQuizDTO;
+import com.quanchun.backendexamsystem.models.responses.QuizDTO;
 import com.quanchun.backendexamsystem.models.responses.SubmittedQuizzDetailResponse;
 import com.quanchun.backendexamsystem.services.QuestionService;
 import com.quanchun.backendexamsystem.services.QuizzService;
 import com.quanchun.backendexamsystem.services.StatisticsService;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api")
@@ -36,12 +30,12 @@ public class QuizzController {
 
     // test ok for admin only
     @GetMapping("/quizzes")
-    public ResponseEntity<List<ResponseQuizDTO>> getAllQuizzes(@RequestParam(required = false) Integer page,
-                                                               @RequestParam(required = false) Integer pageSize,
-                                                               @RequestParam(required = false) String field,
-                                                               @RequestParam(required = false) Integer difficulty,
-                                                               @RequestParam(required = false) String dateOrder,
-                                                               @RequestParam(required = false) String sort)
+    public ResponseEntity<List<QuizDTO>> getAllQuizzes(@RequestParam(required = false) Integer page,
+                                                       @RequestParam(required = false) Integer pageSize,
+                                                       @RequestParam(required = false) String field,
+                                                       @RequestParam(required = false) Integer difficulty,
+                                                       @RequestParam(required = false) String dateOrder,
+                                                       @RequestParam(required = false) String sort)
     {
 
 //        return new ResponseEntity<>(quizzService.getQuizzesWithSortingAndPagingAndFilter(field, sort, page, pageSize, difficulty, dateOrder), HttpStatus.OK);
@@ -50,24 +44,24 @@ public class QuizzController {
 
     // test ok
     @GetMapping("/quizzes/{id}")
-    public ResponseEntity<Quizz> getQuizzById(@PathVariable("id") Integer id) throws QuizzNotFoundException
+    public ResponseEntity<QuizDTO> getQuizzById(@PathVariable("id") Integer id) throws QuizzNotFoundException
     {
-        return new ResponseEntity<>(quizzService.findQuizzById(id), HttpStatus.OK) ;
+        return new ResponseEntity<>(quizzService.toQuizDTO( quizzService.findQuizzById(id)), HttpStatus.OK) ;
     }
 
 
 
     // test ok
     @PostMapping("quizzes/add")
-    public ResponseEntity<Quizz> addNewQuizz(@RequestBody QuizzDTO quizzDTO) throws QuizzExistsException
+    public ResponseEntity<Quizz> addNewQuizz(@RequestBody QuizDTO quizzDTO) throws QuizzExistsException
     {
         return new ResponseEntity<>(quizzService.addQuizz(quizzDTO), HttpStatus.CREATED);
     }
 
     // test ok
     @PutMapping("/quizzes/{id}/update")
-    public ResponseEntity<Quizz> updatedQuizz(@PathVariable("id") Integer id,@RequestBody QuizzDTO updatedQuizz) throws QuizzNotFoundException {
-        return new ResponseEntity<>(quizzService.updateQuizzById(id, updatedQuizz), HttpStatus.OK);
+    public ResponseEntity<QuizDTO> updatedQuizz(@PathVariable("id") Integer id,@RequestBody QuizDTO updatedQuiz) throws QuizzNotFoundException {
+        return new ResponseEntity<>(quizzService.updateQuizzById(id, updatedQuiz), HttpStatus.OK);
     }
 
     @DeleteMapping("/quizzes/{id}")

@@ -7,18 +7,22 @@ import com.quanchun.backendexamsystem.repositories.QuestionAnswerRepository;
 import com.quanchun.backendexamsystem.services.QuestionAnswerService;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
+import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.Objects;
+import java.util.Optional;
 
+@Slf4j
 @Service
 public class QuestionAnswerServiceImpl implements QuestionAnswerService {
     @Autowired
-    QuestionAnswerRepository questionAnswerRepository;
+    private QuestionAnswerRepository questionAnswerRepository;
 
+    private Logger logger = LoggerFactory.getLogger(QuestionAnswer.class);
 
     @Override
     public OptionAnswerDTO toOptionAnswerDTO(QuestionAnswer questionAnswer) {
@@ -39,17 +43,23 @@ public class QuestionAnswerServiceImpl implements QuestionAnswerService {
     }
 
     @Override
-    public QuestionAnswer getQuestionAnswer(int id) {
-        return questionAnswerRepository.findById(id).orElse(null);
+    public QuestionAnswer getQuestionAnswer(int id) throws OptionAnswerNotFoundException {
+        Optional<QuestionAnswer> result = questionAnswerRepository.findById(id);
+
+        if (result.isPresent()) {
+            return result.get();
+        } else {
+            throw new OptionAnswerNotFoundException("Did not find option answer with id - " + id);
+        }
     }
 
+    @Transactional
     @Override
-    public QuestionAnswer updateOptionAnswer(int id, OptionAnswerDTO optionAnswerDTO) throws OptionAnswerNotFoundException {
-        if (getQuestionAnswer(id) == null) {
-            throw new OptionAnswerNotFoundException("Not found option answer with id: " + id);
-        }
-        QuestionAnswer updateQuestionAnswer = toQuestionAnswer(optionAnswerDTO, false);
-        return questionAnswerRepository.save(updateQuestionAnswer);
+    public QuestionAnswer updateOptionAnswer(int id, OptionAnswerDTO updateOptionAnswerDTO) throws OptionAnswerNotFoundException {
+        QuestionAnswer questionAnswer = getQuestionAnswer(id);
+        questionAnswer.setAnswer(updateOptionAnswerDTO.getContent());
+        // QuestionAnswer phải được đính kèm vào EntityManager để cập nhật tự động
+        return questionAnswerRepository.save(questionAnswer);
     }
 
     @Override

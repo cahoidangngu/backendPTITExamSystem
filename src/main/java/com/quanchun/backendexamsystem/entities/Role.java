@@ -15,8 +15,13 @@ import java.util.Set;
 @Table(name = "roles")
 public class Role {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long roleId;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer roleId;
+
     @Column(unique = true)
     private String name;
+
+    @OneToMany(mappedBy = "role", cascade = CascadeType.ALL)
+    @ToString.Exclude
+    private List<User> users;
 }

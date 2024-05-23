@@ -2,10 +2,7 @@ package com.quanchun.backendexamsystem.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.data.repository.cdi.Eager;
 
 import java.util.ArrayList;
@@ -17,6 +14,7 @@ import java.util.List;
 @Entity
 @Table(name = "question_bank")
 @Builder
+@ToString
 public class Question {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -49,7 +47,7 @@ public class Question {
 
     @OneToMany(
             fetch = FetchType.EAGER,
-            cascade = CascadeType.ALL)
+            cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH, CascadeType.REFRESH})
     @JoinColumn(
             name = "question_id"
     )
@@ -67,9 +65,7 @@ public class Question {
     public void addQuestionAnswer(QuestionAnswer answer)
     {
         if(questionAnswers == null)
-        {
             questionAnswers = new ArrayList<>();
-        }
         questionAnswers.add(answer);
     }
     public void deleteQuestionAnswer(QuestionAnswer answer)
@@ -84,12 +80,5 @@ public class Question {
             questionAnswers.remove(answer);
         }
 
-    }
-    public List<QuestionAnswer> getQuestionAnswers() {
-        return questionAnswers;
-    }
-
-    public void setQuestionAnswers(List<QuestionAnswer> questionAnswers) {
-        this.questionAnswers = questionAnswers;
     }
 }

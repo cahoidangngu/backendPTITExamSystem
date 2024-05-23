@@ -1,34 +1,25 @@
 package com.quanchun.backendexamsystem.services.impls;
 
-import com.quanchun.backendexamsystem.entities.Quizz;
-import com.quanchun.backendexamsystem.entities.RegisterQuizz;
 import com.quanchun.backendexamsystem.entities.Role;
 import com.quanchun.backendexamsystem.entities.User;
 import com.quanchun.backendexamsystem.error.RoleNotFoundException;
 import com.quanchun.backendexamsystem.error.UserNotFoundException;
-import com.quanchun.backendexamsystem.mappers.QuizzMapper;
-import com.quanchun.backendexamsystem.models.QuizzDTO;
+import com.quanchun.backendexamsystem.models.RoleDTO;
 import com.quanchun.backendexamsystem.models.UserDTO;
 import com.quanchun.backendexamsystem.models.UserLoginDTO;
-import com.quanchun.backendexamsystem.repositories.QuizzRepository;
-import com.quanchun.backendexamsystem.repositories.RoleRepository;
+import com.quanchun.backendexamsystem.models.responses.QuizDTO;
 import com.quanchun.backendexamsystem.repositories.UserRepository;
+import com.quanchun.backendexamsystem.services.QuizzService;
 import com.quanchun.backendexamsystem.services.RoleService;
 import com.quanchun.backendexamsystem.services.UserService;
-import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
-import java.sql.Timestamp;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.Date;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -39,60 +30,113 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private UserRepository userRepository;
     @Autowired
-    private QuizzRepository quizzRepository;
+    private QuizzService quizzService;
     @Autowired
     private RoleService roleService;
 
     @Override
-    public User addNewUser(UserDTO newUser) throws RoleNotFoundException {
-        User user = User.builder()
-                .username(newUser.getUsername())
-                .fullName(newUser.getFullName())
-                .password(newUser.getPassword())
-                .dob(newUser.getDob())
-                .studyClass(newUser.getStudyClass())
-                .gender(newUser.getGender())
-                .address(newUser.getAddress())
-                .imagePath(newUser.getImagePath())
+    public UserDTO toUserDTO(User user) {
+        RoleDTO roleDTO = new RoleDTO(user.getRole().getRoleId(), user.getRole().getName());
+        return UserDTO.builder()
+                .username(user.getUsername())
+                .fullName(user.getFullName())
+                .phone(user.getPhone())
+                .address(user.getAddress())
+                .userId(user.getUserId())
+                .dob(user.getDob())
+                .role(roleDTO)
+                .gender(user.getGender())
+                .imagePath(user.getImagePath())
+                .password(user.getPassword())
+                .studyClass(user.getStudyClass())
                 .build();
-        Role role = roleService.getRoleById(newUser.getRoleId());
-        user.addRole(role);
+    }
+
+    @Override
+    public User toUser(UserDTO userDTO, boolean status) {
+
+        Role role = new Role();
+        role.setRoleId(userDTO.getRole().getId());
+        role.setName(userDTO.getRole().getName());
+        if (status)
+            return User.builder()
+                    .username(userDTO.getUsername())
+                    .fullName(userDTO.getFullName())
+                    .phone(userDTO.getPhone())
+                    .address(userDTO.getAddress())
+                    .dob(userDTO.getDob())
+                    .gender(userDTO.getGender())
+                    .imagePath(userDTO.getImagePath())
+                    .password(userDTO.getPassword())
+                    .studyClass(userDTO.getStudyClass())
+                    .role(role)
+                    .build();
+        return User.builder().username(userDTO.getUsername())
+                .fullName(userDTO.getFullName())
+                .phone(userDTO.getPhone())
+                .address(userDTO.getAddress())
+                .userId(userDTO.getUserId())
+                .dob(userDTO.getDob())
+                .gender(userDTO.getGender())
+                .imagePath(userDTO.getImagePath())
+                .password(userDTO.getPassword())
+                .studyClass(userDTO.getStudyClass())
+                .role(role)
+                .build();
+    }
+
+    @Override
+    public User addNewUser(UserDTO newUser) throws RoleNotFoundException {
+        Role role = roleService.getRoleById(newUser.getRole().getId());
+        User user = toUser(newUser, true);
+        user.setRole(role);
         return userRepository.save(user);
     }
 
 
     @Override
-    public List<User> getAllUser() throws UserNotFoundException{
+    public List<User> getAllUser() throws UserNotFoundException {
         List<User> users = userRepository.findAll();
-        if(users.isEmpty()) throw new UserNotFoundException("No users in list");
-        return userRepository.findAll();
+        if (users.isEmpty()) throw new UserNotFoundException("No users in list");
+        return users;
     }
+
+    @Override
+    public List<UserDTO> getAllStudent() throws UserNotFoundException, RoleNotFoundException {
+        Role userRole = roleService.getRoleById(2);
+        List<UserDTO> studentList = new ArrayList<>();
+        userRepository.findByRole(userRole).forEach(user -> {
+            studentList.add(toUserDTO(user));
+        });
+        return studentList;
+    }
+
 
     @Override
     public User getUserById(Long userId) throws UserNotFoundException {
         Optional<User> optionalUser = userRepository.findById(userId);
-        if(!optionalUser.isPresent()) throw new UserNotFoundException("Not found user");
+        if (!optionalUser.isPresent()) throw new UserNotFoundException("Not found user");
         return optionalUser.get();
     }
 
     @Override
-    public List<QuizzDTO> getQuizzesByUserId(Long userId) throws UserNotFoundException {
+    public List<QuizDTO> getQuizzesByUserId(Long userId) throws UserNotFoundException {
         Optional<User> optional = userRepository.findById(userId);
-        if(optional.isEmpty())
-        {
+        if (optional.isEmpty()) {
             throw new UserNotFoundException("User with id " + userId + " not found!");
         }
-        List<Quizz> quizzes = optional.get().getRegisterQuizzes()
-                .stream().map(RegisterQuizz::getQuizz)
-                .collect(Collectors.toList());
 
-        return QuizzMapper.MAPPER.toResponses(quizzes);
+        return optional.get().getRegisterQuizzes()
+                .stream().map(registerQuizz -> {
+                    return quizzService.toQuizDTO(registerQuizz.getQuizz());
+                })
+                .toList();
     }
 
     @Override
     public User getUserByUsername(String username) throws UserNotFoundException {
         Optional<User> optionalUser = userRepository.findByUsername(username);
-        if(!optionalUser.isPresent()) throw new UserNotFoundException("Not found user");
+        if (!optionalUser.isPresent()) throw new UserNotFoundException("Not found user");
         return optionalUser.get();
     }
 
@@ -128,11 +172,11 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public boolean userLogin(UserLoginDTO userLogin) throws UserNotFoundException {
-        if (Objects.nonNull(userLogin.getUsername()) && Objects.nonNull( userLogin.getPassword())){
+        if (Objects.nonNull(userLogin.getUsername()) && Objects.nonNull(userLogin.getPassword())) {
             Optional<User> optionalUser = userRepository.findByUsername(userLogin.getUsername());
-            if(!optionalUser.isPresent())
+            if (!optionalUser.isPresent())
                 throw new UserNotFoundException("username not found");
-            return  optionalUser.get().getPassword().equals(userLogin.getPassword());
+            return optionalUser.get().getPassword().equals(userLogin.getPassword());
         }
         return false;
     }
@@ -140,7 +184,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public User deleteUserById(Long userId) throws UserNotFoundException {
         Optional<User> optionalUser = userRepository.findById(userId);
-        if(!optionalUser.isPresent()) throw new UserNotFoundException("Not found user");
+        if (!optionalUser.isPresent()) throw new UserNotFoundException("Not found user");
         userRepository.deleteById(userId);
         return optionalUser.get();
     }
@@ -159,9 +203,9 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Page<User> getUserWithSortAndPagination(String field, Integer page, Integer pageSize) {
-        if(page == null) page = DEFAULT_PAGE;
-        if(pageSize == null) pageSize = DEFAULT_PAGE_SIZE;
-        if(field != null) return userRepository.findAll(PageRequest.of(page, pageSize, Sort.by(field)));
+        if (page == null) page = DEFAULT_PAGE;
+        if (pageSize == null) pageSize = DEFAULT_PAGE_SIZE;
+        if (field != null) return userRepository.findAll(PageRequest.of(page, pageSize, Sort.by(field)));
         return userRepository.findAll(PageRequest.of(page, pageSize));
     }
 }

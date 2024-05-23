@@ -7,5 +7,5 @@ import com.quanchun.backendexamsystem.models.RoleDTO;
 public interface RoleService {
     Role addNewRole(RoleDTO newRole);
 
-    Role getRoleById(Long roleId) throws RoleNotFoundException;
+    Role getRoleById(int roleId) throws RoleNotFoundException;
 }
