@@ -12,6 +12,9 @@ import java.util.List;
 @Repository
 public interface QuizzRepository extends JpaRepository<Quizz, Integer> {
     List<Quizz> findQuizzesByQuestionsId(Integer questionId);
+
+    List<Quizz> findByHostId(int hostId);
+
     Page<Quizz> findQuizzesByDifficulty(Integer difficulty, Pageable pageable);
 
     Page<Quizz> findByCreatedAtAfter(Date startTime, Pageable pageable);

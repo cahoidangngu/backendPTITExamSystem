@@ -16,7 +16,7 @@ import java.util.List;
 public interface UserService {
     User addNewUser(UserDTO newUser) throws RoleNotFoundException;
 
-    Page<User> getAllUser() throws UserNotFoundException;
+    List<User> getAllUser() throws UserNotFoundException;
 
     User getUserById(Long userId) throws UserNotFoundException;
     List<QuizzDTO> getQuizzesByUserId(Long userId) throws UserNotFoundException;
@@ -24,7 +24,7 @@ public interface UserService {
 
     User updateUserById(Long userId, UserDTO updateUser) throws UserNotFoundException;
 
-    boolean userLogin(UserLoginDTO userLogin) throws UserNotFoundException;
+    User userLogin(UserLoginDTO userLogin) throws UserNotFoundException;
 
     User deleteUserById(Long userId) throws UserNotFoundException;
     List<User> getUserWithSorting(String field, Sort.Direction direction);

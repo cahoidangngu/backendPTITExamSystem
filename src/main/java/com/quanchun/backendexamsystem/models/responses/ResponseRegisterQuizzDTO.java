@@ -16,11 +16,10 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 public class ResponseRegisterQuizzDTO {
+    private int registerQuizId;
     @NotNull
     @NotBlank
     private String quizzTitle;
-    private Date startedTime;
-    private Date finishedTime;
     private Date endTime;
     private Date beginTime;
 
@@ -29,11 +28,5 @@ public class ResponseRegisterQuizzDTO {
     private String userFullName;
     private String studyClass;
     private int status;
-    private int score;
-    private List<ResponseAnswerQuestionDTO> quizzQuestions;
-
-    public void addQuizzQuestion(ResponseAnswerQuestionDTO responseAnswerQuestionDTO){
-        if(quizzQuestions == null) quizzQuestions = new ArrayList<>();
-        quizzQuestions.add(responseAnswerQuestionDTO);
-    }
+    private int numberParticipantAttempt;
 }

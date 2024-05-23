@@ -60,29 +60,12 @@ public class UserServiceImpl implements UserService {
         return userRepository.save(user);
     }
 
-    @PostConstruct
-    public void initDB()
-    {
-        LocalDateTime now = LocalDateTime.now();
 
-        Date date = Timestamp.valueOf(now);
-        List<User> users = IntStream.rangeClosed(100, 300)
-                .mapToObj(i -> User.builder()
-                        .username("Duong Tuan " + i)
-                        .dob(date)
-                        .gender(true)
-                        .password("password" + i)
-                        .studyClass("E21CQCN03")
-                        .username("B21DCCN" + i)
-                        .build())
-                .collect(Collectors.toList());
-        userRepository.saveAll(users);
-    }
     @Override
-    public Page<User> getAllUser() throws UserNotFoundException{
+    public List<User> getAllUser() throws UserNotFoundException{
         List<User> users = userRepository.findAll();
         if(users.isEmpty()) throw new UserNotFoundException("No users in list");
-        return (Page<User>) userRepository.findAll();
+        return userRepository.findAll();
     }
 
     @Override
@@ -144,14 +127,18 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public boolean userLogin(UserLoginDTO userLogin) throws UserNotFoundException {
+    public User userLogin(UserLoginDTO userLogin) throws UserNotFoundException {
         if (Objects.nonNull(userLogin.getUsername()) && Objects.nonNull( userLogin.getPassword())){
+            boolean check = false;
             Optional<User> optionalUser = userRepository.findByUsername(userLogin.getUsername());
             if(!optionalUser.isPresent())
                 throw new UserNotFoundException("username not found");
-            return  optionalUser.get().getPassword().equals(userLogin.getPassword());
+            if(!optionalUser.get().getPassword().equals(userLogin.getPassword())){
+                throw new UserNotFoundException("Password not found");
+            }
+            return optionalUser.get();
         }
-        return false;
+        return null;
     }
 
     @Override

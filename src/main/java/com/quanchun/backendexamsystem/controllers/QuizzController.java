@@ -2,13 +2,12 @@ package com.quanchun.backendexamsystem.controllers;
 
 import com.quanchun.backendexamsystem.entities.Question;
 import com.quanchun.backendexamsystem.entities.Quizz;
-import com.quanchun.backendexamsystem.entities.RegisterQuizz;
 import com.quanchun.backendexamsystem.error.QuizzExistsException;
 import com.quanchun.backendexamsystem.error.QuizzNotFoundException;
-import com.quanchun.backendexamsystem.error.UserNotFoundException;
 import com.quanchun.backendexamsystem.models.QuestionDTO;
 import com.quanchun.backendexamsystem.models.QuizzDTO;
 import com.quanchun.backendexamsystem.models.UserDTO;
+import com.quanchun.backendexamsystem.models.responses.ResponseQuizDTO;
 import com.quanchun.backendexamsystem.models.responses.SubmittedQuizzDetailResponse;
 import com.quanchun.backendexamsystem.services.QuestionService;
 import com.quanchun.backendexamsystem.services.QuizzService;
@@ -39,11 +38,11 @@ public class QuizzController {
     // test ok for admin only
     @GetMapping("/quizzes")
     public ResponseEntity<Page<QuizzDTO>> getAllQuizzes(@RequestParam(required = false) Integer page,
-                                                     @RequestParam(required = false) Integer pageSize,
-                                                     @RequestParam(required = false) String field,
-                                                     @RequestParam(required = false) Integer difficulty,
-                                                     @RequestParam(required = false) String dateOrder,
-                                                     @RequestParam(required = false) String sort)
+                                                        @RequestParam(required = false) Integer pageSize,
+                                                        @RequestParam(required = false) String field,
+                                                        @RequestParam(required = false) Integer difficulty,
+                                                        @RequestParam(required = false) String dateOrder,
+                                                        @RequestParam(required = false) String sort)
     {
 
         return new ResponseEntity<>(quizzService.getQuizzesWithSortingAndPagingAndFilter(field, sort, page, pageSize, difficulty, dateOrder), HttpStatus.OK);
@@ -56,34 +55,6 @@ public class QuizzController {
         return new ResponseEntity<>(quizzService.findQuizzById(id), HttpStatus.OK) ;
     }
 
-    // test ok
-    // for each teacher
-    @GetMapping("/quizzes/filter")
-    public List<Quizz> getQuizzesByFilter(@RequestParam(required = false) @Min(1) @Max(3) Integer difficulty, @RequestParam Integer hostId)
-    {
-        List<Quizz> quizzes = new ArrayList<>();
-        if (difficulty != null)
-        {
-            Map<Quizz, Integer> mp = new LinkedHashMap<>();
-            quizzService.getQuizzesByHostId(hostId).forEach(quizz -> {
-                if(!mp.containsKey(quizz)) mp.put(quizz, 1);
-                else {
-                    mp.put(quizz, mp.get(quizz) + 1);
-                }
-            });
-            quizzService.getQuizzesByDifficulty(difficulty).forEach(quizz -> {
-                if(mp.get(quizz) >= 1)
-                {
-                    quizzes.add(quizz);
-                }
-            });
-        }
-        else
-        {
-            quizzService.getQuizzesByHostId(hostId).forEach(quizzes::add);
-        }
-        return quizzes;
-    }
 
 
     // test ok
@@ -99,10 +70,10 @@ public class QuizzController {
         return new ResponseEntity<>(quizzService.updateQuizzById(id, updatedQuizz), HttpStatus.OK);
     }
 
-    @DeleteMapping("/quizzes/{id}/delete")
-    public ResponseEntity<Quizz> deletedQuizz(@PathVariable("id") Integer id) throws QuizzNotFoundException {
-        quizzService.deleteById(id);
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    @DeleteMapping("/quizzes/{id}")
+    public ResponseEntity<?> deleteQuiz(@PathVariable("id") Integer id) throws QuizzNotFoundException {
+            quizzService.deleteById(id);
+            return ResponseEntity.ok().body("Quiz successfully deleted.");
     }
     // the same :))
     @PostMapping("/add-question/{id}")

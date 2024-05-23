@@ -18,10 +18,10 @@ public class SubmittedUserDTO {
     private String userName;
     @NotBlank
     @NotNull
-    private Date beginTime;
+    private Date startTime;
     @NotNull
     @NotNull
     private Date finishedTime;
     @NotBlank
-    private int score;
+    private double score;
 }

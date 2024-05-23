@@ -1,5 +1,6 @@
 package com.quanchun.backendexamsystem.services.impls;
 
+import com.quanchun.backendexamsystem.entities.ParticipantAttempt;
 import com.quanchun.backendexamsystem.entities.Quizz;
 import com.quanchun.backendexamsystem.entities.RegisterQuizz;
 import com.quanchun.backendexamsystem.entities.User;
@@ -15,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -42,14 +44,17 @@ public class StatisticServiceImpl implements StatisticsService {
         List<RegisterQuizz> registerQuizzes = registerQuizzRepository.findByQuizz(quizz);
         SubmittedQuizzDetailResponse response = new SubmittedQuizzDetailResponse();
         for(RegisterQuizz registerQuizz : registerQuizzes) {
+            int lastOIndexParticipantAttempt = registerQuizz.getParticipantAttemptList().size() -1;
+
+            double scoreOfEachQuizz = registerQuizz.getParticipantAttemptList().stream().mapToDouble(ParticipantAttempt::getScore).average().getAsDouble();
             SubmittedUserDTO theDto = SubmittedUserDTO.builder()
-                    .userName(registerQuizz.getUser().getFullName())
-                    .beginTime(registerQuizz.getBeginTime())
-                    .finishedTime(registerQuizz.getFinishedTime())
-                    .score(registerQuizz.getScore())
-                    .build();
-            totalScore += registerQuizz.getScore();
-            long diffMil = registerQuizz.getFinishedTime().getTime() - registerQuizz.getBeginTime().getTime();
+                                                      .userName(registerQuizz.getUser().getFullName())
+                                                      .startTime(registerQuizz.getParticipantAttemptList().get(lastOIndexParticipantAttempt).getStartTime())
+                                                      .finishedTime(registerQuizz.getParticipantAttemptList().get(lastOIndexParticipantAttempt).getFinishTime())
+                                                      .score(scoreOfEachQuizz)
+                                                      .build();
+            totalScore += scoreOfEachQuizz;
+            long diffMil = theDto.getFinishedTime().getTime() - theDto.getStartTime().getTime();
             long diffMinutes = TimeUnit.MINUTES.convert(diffMil, TimeUnit.MILLISECONDS);
             totalTime += diffMinutes;
             response.addSumittedUser(theDto);
@@ -72,12 +77,13 @@ public class StatisticServiceImpl implements StatisticsService {
         List<SubmittedUserDTO> response = new ArrayList<>();
         for(RegisterQuizz registerQuizz : registerQuizzes)
         {
+            int lastOIndexParticipantAttempt = registerQuizz.getParticipantAttemptList().size() -1;
             response.add(SubmittedUserDTO.builder()
-                            .userName(registerQuizz.getUser().getFullName())
-                            .beginTime(registerQuizz.getBeginTime())
-                            .finishedTime(registerQuizz.getFinishedTime())
-                            .score(registerQuizz.getScore())
-                    .build());
+                                         .userName(registerQuizz.getUser().getFullName())
+                                         .startTime(registerQuizz.getParticipantAttemptList().get(lastOIndexParticipantAttempt).getStartTime())
+                                         .finishedTime(registerQuizz.getParticipantAttemptList().get(lastOIndexParticipantAttempt).getFinishTime())
+                                         .score(registerQuizz.getParticipantAttemptList().stream().mapToDouble(ParticipantAttempt::getScore).average().getAsDouble())
+                                         .build());
         }
         return response;
     }

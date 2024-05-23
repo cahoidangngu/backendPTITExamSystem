@@ -12,4 +12,5 @@ public interface StatisticsService {
 
     List<SubmittedUserDTO> getUserSubmittedResult(int userId) throws UserNotFoundException;
 
+
 }

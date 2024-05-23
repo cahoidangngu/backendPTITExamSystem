@@ -8,6 +8,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -15,13 +16,17 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 public class QuestionDTO {
-    @NotBlank
-    private String questionContent;
+    private int id;
+    private String question;
     private int difficulty;
     private int multianswer;
-    private int correctedAnswer;
-    @NotBlank
+    private int answer;
     private String category;
-    private List<QuestionAnswerDTO> questionAnswers;
+    private List<OptionAnswerDTO> optionAnswers;
+
+    public void addOptionAnswer(OptionAnswerDTO optionAnswer){
+        if(optionAnswers==null) optionAnswers = new ArrayList<>();
+        optionAnswers.add(optionAnswer);
+    }
 
 }

@@ -48,12 +48,8 @@ public class QuestionController {
     }
 
 
-    // Maybe we do not need
-    @GetMapping("questions/filter")
-    public List<Question> getQuestionsByFilter(@RequestParam String category)
-    {
-        return questionService.getQuestionsByCategory(category);
-    }
+
+
     // test ok
     @GetMapping("questions/{id}")
     public Question getQuestionById(@PathVariable("id") Integer id) throws QuestionNotFoundException

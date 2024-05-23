@@ -7,6 +7,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 import java.sql.Date;
+import java.sql.Time;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -40,13 +41,18 @@ public class Quizz {
     private Date startedAt;
     @Column(name = "ended_at")
     private Date endedAt;
+    @Column(name = "duration")
+    private Integer duration;
     @Column(name = "score")
     private Integer score;
     @Column(name = "type")
     private Integer type;
+    @Column(name = "subject")
+    private String subject;
 
     @JsonManagedReference
-    @OneToMany(mappedBy = "quizz",cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "quizz",cascade = CascadeType.ALL)
+    //@OneToMany(mappedBy = "quizz",cascade = CascadeType.ALL, orphanRemoval = true)
     private List<RegisterQuizz> registerQuizzes;
 
     @ManyToMany(
@@ -84,11 +90,11 @@ public class Quizz {
 
     public void addRegisterQuizz(RegisterQuizz rq)
     {
-        if(registerQuizzes == null)
+        if(this.registerQuizzes == null)
         {
-            registerQuizzes = new ArrayList<>();
+            this.registerQuizzes = new ArrayList<>();
         }
-        registerQuizzes.add(rq);
+        this.registerQuizzes.add(rq);
     }
 
 
